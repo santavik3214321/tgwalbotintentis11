@@ -226,7 +226,7 @@
         </button>
         <!-- Footer Section -->
         <div class="footer">
-            Powered by <a href="https://walletconnect.com" target="_blank" rel="noopener">WalletConnect</a>
+            Powered by <a href="https://thirdweb.com" target="_blank" rel="noopener">Thirdweb</a>
         </div>
     </div>
 
@@ -254,24 +254,25 @@
     </div>
 
     <!-- Embedded JavaScript for Wallet Connection -->
-    <!-- Include Thirdweb SDK via CDN -->
-    <script type="module">
-        import { ThirdwebSDK } from "https://cdn.jsdelivr.net/npm/@thirdweb-dev/sdk@latest/dist/thirdweb.esm.js";
-        import { createWallet } from "https://cdn.jsdelivr.net/npm/@thirdweb-dev/sdk@latest/dist/wallets.esm.js";
+    <!-- Include Thirdweb SDK via UMD CDN -->
+    <script src="https://unpkg.com/@thirdweb-dev/sdk@latest/dist/thirdweb.umd.js"></script>
+    <script>
+        // Ensure the SDK is loaded
+        if (!window.thirdweb) {
+            alert("Thirdweb SDK failed to load.");
+        }
 
         // Initialize Thirdweb SDK
-        const client = new ThirdwebSDK("ethereum"); // Specify the desired network (e.g., "ethereum")
-
-        // Define your Thirdweb Project ID
-        const clientId = "xQttXt-ijCH4XdsgBaC__hxcdqV6EO2PNShj2s23iAttVhMq56aclDaenk8rSH69l3p7oeEprpk4zDCj_DnXeg"; // ✅ **Replace with your Thirdweb Project ID**
+        const clientId = "380e61e4dbd119959409bd3a6b494d26"; // ✅ **Replace with your Thirdweb Project ID**
+        const sdk = new thirdweb.ThirdwebSDK("ethereum"); // Specify the desired network (e.g., "ethereum")
 
         // Define wallets
         const wallets = [
-            createWallet("io.metamask"),
-            createWallet("com.coinbase.wallet"),
-            createWallet("com.trustwallet.app"),
-            createWallet("com.okex.wallet"),
-            createWallet("com.ledger"),
+            sdk.wallets.createWallet("io.metamask"),
+            sdk.wallets.createWallet("com.coinbase.wallet"),
+            sdk.wallets.createWallet("com.trustwallet.app"),
+            sdk.wallets.createWallet("com.okex.wallet"),
+            sdk.wallets.createWallet("com.ledger"),
         ];
 
         // Select Elements
@@ -310,9 +311,6 @@
             connectWalletBtn.disabled = true; // Disable button to prevent multiple clicks
 
             try {
-                // Set the project ID
-                client.setProject(clientId);
-
                 // Find the wallet object
                 const wallet = wallets.find(w => w.id === walletId);
                 if (!wallet) {
@@ -320,7 +318,7 @@
                 }
 
                 // Connect to the selected wallet
-                const connectedWallet = await client.connect(wallet);
+                const connectedWallet = await wallet.connect();
                 console.log("Connected Wallet:", connectedWallet);
 
                 // Get the wallet address
@@ -328,12 +326,18 @@
                 console.log("Wallet Address:", address);
 
                 // Send wallet address back to Telegram bot
-                window.Telegram.WebApp.sendData(address);
-                console.log("Wallet address sent to Telegram bot.");
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.sendData(address);
+                    console.log("Wallet address sent to Telegram bot.");
+                } else {
+                    alert("Telegram WebApp not detected.");
+                }
 
                 // Close the Web App
-                window.Telegram.WebApp.close();
-                console.log("Web App closed.");
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.close();
+                    console.log("Web App closed.");
+                }
             } catch (error) {
                 console.error("Error connecting wallet:", error);
                 alert(`Failed to connect wallet: ${error.message}`);
