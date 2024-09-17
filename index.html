@@ -254,22 +254,22 @@
     </div>
 
     <!-- Embedded JavaScript for Wallet Connection -->
-    <!-- Include Thirdweb SDK via ESM.sh CDN -->
+    <!-- Include Thirdweb SDK via Skypack CDN -->
     <script type="module">
-        // Import Thirdweb SDK and Wallet from esm.sh
-        import { ThirdwebSDK, Wallet } from "https://esm.sh/@thirdweb-dev/sdk@4.0.99";
+        // Import Thirdweb SDK from Skypack
+        import { ThirdwebSDK, createWallet } from 'https://cdn.skypack.dev/@thirdweb-dev/sdk';
 
         // Initialize Thirdweb SDK
         const clientId = "380e61e4dbd119959409bd3a6b494d26"; // ✅ **Replace with your Thirdweb Project ID**
-        const sdk = new ThirdwebSDK("ethereum"); // Specify the desired network (e.g., "ethereum")
+        const sdk = new ThirdwebSDK("ethereum"); // Specify the desired network (e.g., "ethereum", "goerli", "polygon")
 
         // Define wallets
         const wallets = [
-            sdk.wallets.createWallet("io.metamask"),
-            sdk.wallets.createWallet("com.coinbase.wallet"),
-            sdk.wallets.createWallet("com.trustwallet.app"),
-            sdk.wallets.createWallet("com.okex.wallet"),
-            sdk.wallets.createWallet("com.ledger"),
+            createWallet("io.metamask"),
+            createWallet("com.coinbase.wallet"),
+            createWallet("com.trustwallet.app"),
+            createWallet("com.okex.wallet"),
+            createWallet("com.ledger"),
         ];
 
         // Select Elements
@@ -315,7 +315,7 @@
                 }
 
                 // Connect to the selected wallet
-                const connectedWallet = await wallet.connect();
+                const connectedWallet = await sdk.wallets.connect(wallet);
                 console.log("Connected Wallet:", connectedWallet);
 
                 // Get the wallet address
