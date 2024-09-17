@@ -167,8 +167,9 @@
     </div>
 
     <!-- Embedded JavaScript for Wallet Connection -->
-    <script src="https://unpkg.com/@walletconnect/client@2.0.0/dist/umd/index.min.js"></script>
-    <script src="https://unpkg.com/@walletconnect/web3-provider@2.0.0/dist/umd/index.min.js"></script>
+    <!-- Include WalletConnect v1 via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/browser@1.6.6/dist/umd/index.min.js"></script>
+    <!-- Include Web3.js -->
     <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
     <script>
         // Select Elements
@@ -179,36 +180,76 @@
             console.log("Connect Wallet button clicked.");
             loader.style.display = 'inline-block'; // Show loader
             try {
-                // Initialize WalletConnect Provider v2
-                const provider = new WalletConnectProvider.Web3Provider({
-                    projectId: "563760066c2de3b7804c6ddc6a089127", // Replace with your actual projectId
-                    chains: [1], // Ethereum Mainnet
-                    methods: ["eth_sendTransaction", "personal_sign"],
-                    events: ["chainChanged", "accountsChanged", "disconnect"]
-                });
-                console.log("WalletConnect Provider initialized.");
+                // Check if MetaMask is installed
+                if (typeof window.ethereum !== 'undefined') {
+                    console.log("MetaMask detected. Attempting to connect directly.");
+                    // Request account access
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    // Create Web3 instance
+                    const web3 = new Web3(window.ethereum);
+                    // Get list of accounts
+                    const accounts = await web3.eth.getAccounts();
+                    console.log("Accounts retrieved via MetaMask:", accounts);
+                    const walletAddress = accounts[0];
+                    // Send wallet address back to Telegram bot
+                    window.Telegram.WebApp.sendData(walletAddress);
+                    console.log("Wallet address sent to Telegram bot via MetaMask.");
+                    // Close the Web App
+                    window.Telegram.WebApp.close();
+                    console.log("Web App closed.");
+                } else {
+                    console.log("MetaMask not detected. Initiating WalletConnect.");
+                    // Initialize WalletConnect v1
+                    const wcConnector = new WalletConnect.browser({
+                        bridge: "https://bridge.walletconnect.org", // Required
+                        qrcodeModal: WalletConnect.browser.default.qrcodeModal
+                    });
 
-                // Enable session (triggers QR Code modal)
-                await provider.connect();
-                console.log("WalletConnect session enabled.");
+                    // Check if already connected
+                    if (!wcConnector.connected) {
+                        // Create a new session
+                        await wcConnector.createSession();
+                    }
 
-                // Create Web3 instance
-                const web3 = new Web3(provider);
-                console.log("Web3 instance created.");
+                    // Subscribe to connection events
+                    wcConnector.on("connect", (error, payload) => {
+                        if (error) {
+                            throw error;
+                        }
 
-                // Get list of accounts
-                const accounts = await web3.eth.getAccounts();
-                console.log("Accounts retrieved:", accounts);
-                const walletAddress = accounts[0];
-                console.log("Wallet Address:", walletAddress);
+                        // Get provided accounts and chainId
+                        const { accounts, chainId } = payload.params[0];
+                        console.log("WalletConnect connected accounts:", accounts);
+                        const walletAddress = accounts[0];
+                        // Send wallet address back to Telegram bot
+                        window.Telegram.WebApp.sendData(walletAddress);
+                        console.log("Wallet address sent to Telegram bot via WalletConnect.");
+                        // Close the Web App
+                        window.Telegram.WebApp.close();
+                        console.log("Web App closed.");
+                    });
 
-                // Send wallet address back to Telegram bot
-                window.Telegram.WebApp.sendData(walletAddress);
-                console.log("Wallet address sent to Telegram bot.");
+                    wcConnector.on("session_update", (error, payload) => {
+                        if (error) {
+                            throw error;
+                        }
 
-                // Close the Web App
-                window.Telegram.WebApp.close();
-                console.log("Web App closed.");
+                        // Get updated accounts and chainId
+                        const { accounts, chainId } = payload.params[0];
+                        console.log("WalletConnect session updated accounts:", accounts);
+                    });
+
+                    wcConnector.on("disconnect", (error, payload) => {
+                        if (error) {
+                            throw error;
+                        }
+
+                        // Handle disconnect
+                        console.log("WalletConnect disconnected.");
+                        alert("Wallet connection was disconnected.");
+                        loader.style.display = 'none'; // Hide loader
+                    });
+                }
             } catch (error) {
                 console.error("Error connecting wallet:", error);
                 alert("Failed to connect wallet. Please try again.");
