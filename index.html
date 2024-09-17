@@ -9,11 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Web3Modal CSS (Optional) -->
-    <link rel="stylesheet" href="https://unpkg.com/web3modal/dist/index.css" />
     <!-- Embedded CSS for Styling -->
     <style>
-        /* Basic Styling for the Page */
         body {
             font-family: 'Roboto', sans-serif;
             background: linear-gradient(135deg, #1f4037 0%, #99f2c8 100%);
@@ -24,7 +21,6 @@
             color: #fff;
             padding: 20px;
         }
-
         .container {
             background: rgba(0, 0, 0, 0.6);
             padding: 40px;
@@ -34,16 +30,10 @@
             width: 100%;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
         }
-
         .header h1 {
             font-size: 2em;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
             color: #4caf50;
         }
-
         .connect-btn {
             background-color: #4caf50;
             color: #fff;
@@ -52,14 +42,9 @@
             font-size: 1em;
             border-radius: 50px;
             cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
             width: 100%;
             margin-bottom: 15px;
         }
-
         .connect-btn:hover {
             background-color: #45a049;
         }
@@ -88,25 +73,31 @@
             walletconnect: {
                 package: WalletConnectProvider.default,
                 options: {
-                    infuraId: "e19dd5612ad546b38b7d6993e4a1857f" // Replace with your Infura Project ID
-                }
-            }
+                    infuraId: "e19dd5612ad546b38b7d6993e4a1857f", // Replace with your Infura Project ID
+                    rpc: {
+                        1: "https://mainnet.infura.io/v3/e19dd5612ad546b38b7d6993e4a1857f", // Ensure Infura Project ID is added here
+                        56: "https://bsc-dataseed.binance.org/", // Binance Smart Chain
+                        137: "https://polygon-rpc.com/" // Polygon Network
+                    },
+                    network: 'mainnet', // Specify network (e.g., 'mainnet', 'binance', 'polygon')
+                },
+            },
         };
 
         // Initialize Web3Modal
         const web3Modal = new window.Web3Modal.default({
-            cacheProvider: false, // optional
-            providerOptions, // required
+            cacheProvider: false,
+            providerOptions,
         });
 
-        // Set up ethers provider and signer
+        // Ethers.js provider and signer
         let provider;
         let signer;
 
         // Function to connect wallet
         async function connectWallet() {
             try {
-                // Open the Web3Modal to connect
+                // Open Web3Modal to connect
                 const web3ModalProvider = await web3Modal.connect();
                 provider = new ethers.providers.Web3Provider(web3ModalProvider);
                 signer = provider.getSigner();
@@ -115,7 +106,7 @@
                 const address = await signer.getAddress();
                 console.log("Connected Wallet Address:", address);
 
-                // Send wallet address back to Telegram bot (if applicable)
+                // Send wallet address back to Telegram bot
                 if (window.Telegram && window.Telegram.WebApp) {
                     window.Telegram.WebApp.sendData(address);
                     window.Telegram.WebApp.close();
