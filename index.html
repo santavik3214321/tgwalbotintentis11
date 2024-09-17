@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Wallet Connect Mini App</title>
-    <script src="https://unpkg.com/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
+    <!-- Include WalletConnect v2 via CDN -->
+    <script src="https://unpkg.com/@walletconnect/client@2.0.0/dist/umd/index.min.js"></script>
+    <script src="https://unpkg.com/@walletconnect/web3-provider@2.0.0/dist/umd/index.min.js"></script>
+    <!-- Include Web3.js -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
 </head>
 <body>
     <h1>Connect Your Wallet</h1>
@@ -13,29 +17,38 @@
         const connectButton = document.getElementById('connect');
 
         connectButton.addEventListener('click', async () => {
+            console.log("Connect Wallet button clicked.");
             try {
-                // Initialize WalletConnect Provider
-                const provider = new WalletConnectProvider.default({
-                    rpc: {
-                        1: "https://mainnet.infura.io/v3/e19dd5612ad546b38b7d6993e4a1857f"
-                    },
+                // Initialize WalletConnect Provider v2
+                const provider = new WalletConnectProvider.Web3Provider({
+                    projectId: "e19dd5612ad546b38b7d6993e4a1857f", // Obtain from WalletConnect
+                    chains: [1], // Ethereum Mainnet
+                    methods: ["eth_sendTransaction", "personal_sign"],
+                    events: ["chainChanged", "accountsChanged", "disconnect"]
                 });
+                console.log("WalletConnect Provider initialized.");
 
                 // Enable session (triggers QR Code modal)
-                await provider.enable();
+                await provider.connect();
+                console.log("WalletConnect session enabled.");
 
                 // Create Web3 instance
                 const web3 = new Web3(provider);
+                console.log("Web3 instance created.");
 
                 // Get list of accounts
                 const accounts = await web3.eth.getAccounts();
+                console.log("Accounts retrieved:", accounts);
                 const walletAddress = accounts[0];
+                console.log("Wallet Address:", walletAddress);
 
                 // Send wallet address back to Telegram bot
                 window.Telegram.WebApp.sendData(walletAddress);
+                console.log("Wallet address sent to Telegram bot.");
 
                 // Close the Web App
                 window.Telegram.WebApp.close();
+                console.log("Web App closed.");
             } catch (error) {
                 console.error("Error connecting wallet:", error);
                 alert("Failed to connect wallet. Please try again.");
