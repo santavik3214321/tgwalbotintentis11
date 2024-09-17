@@ -3,22 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Connect Your Wallet</title>
-    <!-- Responsive Meta Tag -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Embedded CSS for Styling -->
     <style>
-        /* Reset CSS */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* Body Styling */
+        /* Basic Styling */
         body {
             font-family: 'Roboto', sans-serif;
             background: linear-gradient(135deg, #1f4037 0%, #99f2c8 100%);
@@ -29,8 +18,6 @@
             color: #fff;
             padding: 20px;
         }
-
-        /* Container */
         .container {
             background: rgba(0, 0, 0, 0.6);
             padding: 40px;
@@ -39,39 +26,7 @@
             max-width: 500px;
             width: 100%;
             box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-            transition: transform 0.3s ease;
         }
-
-        .container:hover {
-            transform: translateY(-10px);
-        }
-
-        /* Header */
-        .header {
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            font-size: 2em;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .header h1 i {
-            font-size: 1.2em;
-            color: #4caf50;
-        }
-
-        /* Description */
-        .description {
-            font-size: 1em;
-            margin-bottom: 30px;
-        }
-
-        /* Connect Wallet Button */
         .connect-btn {
             background-color: #4caf50;
             color: #fff;
@@ -80,181 +35,68 @@
             font-size: 1em;
             border-radius: 50px;
             cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
             transition: background-color 0.3s ease, transform 0.2s ease;
             width: 100%;
             margin-bottom: 15px;
         }
-
         .connect-btn:hover {
             background-color: #45a049;
             transform: scale(1.05);
-        }
-
-        .connect-btn:active {
-            transform: scale(0.95);
-        }
-
-        .connect-btn i {
-            font-size: 1.2em;
-        }
-
-        /* Loader Styling */
-        .loader {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #4caf50; /* Green */
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Footer */
-        .footer {
-            margin-top: 20px;
-            font-size: 0.8em;
-            opacity: 0.8;
-        }
-
-        .footer a {
-            color: #fff;
-            text-decoration: underline;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
-            }
-
-            .header h1 {
-                font-size: 1.5em;
-            }
-
-            .connect-btn {
-                padding: 12px 20px;
-                font-size: 0.9em;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header Section -->
-        <div class="header">
-            <h1><i class="fas fa-wallet" aria-hidden="true"></i> Connect Your Wallet</h1>
-        </div>
-        <!-- Description Section -->
-        <div class="description">
-            Seamlessly connect your cryptocurrency wallet to access exclusive features and manage your assets securely.
-        </div>
-        <!-- Connect Wallet Button -->
+        <h1><i class="fas fa-wallet"></i> Connect Your Wallet</h1>
         <button class="connect-btn" id="connectWallet">
-            <i class="fas fa-wallet" aria-hidden="true"></i> Connect Wallet
-            <span id="loaderWallet" class="loader" style="display: none;"></span>
+            <i class="fas fa-wallet"></i> Connect Wallet
         </button>
-        <!-- Footer Section -->
-        <div class="footer">
-            Powered by <a href="https://walletconnect.com" target="_blank" rel="noopener">WalletConnect</a>
-        </div>
     </div>
 
-    <!-- Embedded JavaScript for Wallet Connection -->
-    <!-- Include Web3Modal v2 via CDN -->
-    <script src="https://unpkg.com/web3modal@2.0.0-beta.10/dist/index.js"></script>
-    <!-- Include WalletConnect v2 Web3 Provider via CDN -->
-    <script src="https://unpkg.com/@walletconnect/web3-provider@2.3.1/dist/umd/index.min.js"></script>
-    <!-- Include Web3.js -->
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+    <!-- Include Thirdweb UMD SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/thirdweb/3.0.0/thirdweb.umd.min.js"></script>
     <script>
-        // Select Elements
-        const connectWalletBtn = document.getElementById('connectWallet');
-        const loaderWallet = document.getElementById('loaderWallet');
-
-        // Initialize Web3Modal with WalletConnect v2
-        const providerOptions = {
-            walletconnect: {
-                package: window.WalletConnectProvider.default, // required
-                options: {
-                    projectId: "32e4e5c84641a6ac5040f1148649e9b7", // ✅ **Replace with your WalletConnect Project ID**
-                    chains: [1, 3, 4, 5, 42], // Optional: Supported chains (e.g., Mainnet, Ropsten, Rinkeby, Goerli, Kovan)
-                    showQrModal: true, // Optional: Enable QR modal
-                },
-            },
-            // Add other providers here if needed (e.g., Coinbase Wallet, Fortmatic)
-        };
-
-        const web3Modal = new window.Web3Modal.default({
-            cacheProvider: false, // optional
-            providerOptions, // required
-            disableInjectedProvider: false, // optional. For MetaMask / TrustWallet
-        });
-
-        // Connect Wallet Handler
-        connectWalletBtn.addEventListener('click', async () => {
-            console.log("Connect Wallet button clicked.");
-            loaderWallet.style.display = 'inline-block'; // Show loader
-            try {
-                const provider = await web3Modal.connect(); // Open Web3Modal
-                console.log("Provider connected:", provider);
-
-                const web3 = new Web3(provider); // Initialize Web3 with the provider
-                const accounts = await web3.eth.getAccounts(); // Get user accounts
-                console.log("Accounts retrieved:", accounts);
-                const walletAddress = accounts[0];
-
-                // Send wallet address back to Telegram bot
-                window.Telegram.WebApp.sendData(walletAddress);
-                console.log("Wallet address sent to Telegram bot.");
-                
-                // Close the Web App
-                window.Telegram.WebApp.close();
-                console.log("Web App closed.");
-            } catch (error) {
-                console.error("Error connecting wallet:", error);
-                alert(`Failed to connect wallet: ${error.message}`);
-            } finally {
-                loaderWallet.style.display = 'none'; // Hide loader
-            }
-        });
-
-        // Optional: Listen for provider events to handle account or network changes
-        // This ensures the app responds to wallet account changes
-        window.Telegram.WebApp.ready();
-
-        // Optional: Handle wallet disconnection and other events
-        if (web3Modal.cachedProvider) {
-            web3Modal.connect().then(provider => {
-                if (provider.on) {
-                    provider.on("disconnect", (code, reason) => {
-                        console.log("Wallet disconnected:", code, reason);
-                    });
-
-                    provider.on("accountsChanged", (accounts) => {
-                        console.log("Accounts changed:", accounts);
-                    });
-
-                    provider.on("chainChanged", (chainId) => {
-                        console.log("Chain changed:", chainId);
-                    });
-
-                    provider.on("networkChanged", (networkId) => {
-                        console.log("Network changed:", networkId);
-                    });
-                }
-            }).catch(e => {
-                console.log("Could not connect to cached provider:", e);
+        (async () => {
+            // Initialize Thirdweb client
+            const client = new thirdweb.ThirdwebSDK({
+                clientId: '380e61e4dbd119959409bd3a6b494d26', // Replace with your Thirdweb Client ID
             });
-        }
+
+            // Define wallets
+            const wallets = [
+                client.wallets.metamask(),
+                client.wallets.coinbase(),
+                client.wallets.trustwallet(),
+                client.wallets.okex(),
+                client.wallets.ledger(),
+            ];
+
+            // Select the connect button
+            const connectWalletBtn = document.getElementById('connectWallet');
+
+            // Add click event to connect button
+            connectWalletBtn.addEventListener('click', async () => {
+                try {
+                    // Open the wallet connection modal
+                    const wallet = await client.wallets.connect({
+                        wallets: wallets,
+                    });
+
+                    // Get wallet address
+                    const address = await wallet.getAddress();
+                    console.log('Connected wallet address:', address);
+
+                    // Send the address to Telegram WebApp
+                    if (window.Telegram && window.Telegram.WebApp) {
+                        window.Telegram.WebApp.sendData(address);
+                        window.Telegram.WebApp.close();
+                    }
+                } catch (error) {
+                    console.error('Failed to connect wallet:', error);
+                    alert('Failed to connect wallet. Please try again.');
+                }
+            });
+        })();
     </script>
 </body>
 </html>
