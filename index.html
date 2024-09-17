@@ -151,7 +151,7 @@
     <div class="container">
         <!-- Header Section -->
         <div class="header">
-            <h1><i class="fas fa-wallet"></i> Connect Your Wallet</h1>
+            <h1><i class="fas fa-wallet" aria-hidden="true"></i> Connect Your Wallet</h1>
         </div>
         <!-- Description Section -->
         <div class="description">
@@ -159,22 +159,22 @@
         </div>
         <!-- Connect with MetaMask Button -->
         <button class="connect-btn" id="connectMetaMask">
-            <i class="fab fa-ethereum"></i> Connect with MetaMask
+            <i class="fab fa-ethereum" aria-hidden="true"></i> Connect with MetaMask
             <span id="loaderMetaMask" class="loader" style="display: none;"></span>
         </button>
         <!-- Connect with WalletConnect Button -->
         <button class="connect-btn" id="connectWalletConnect">
-            <i class="fas fa-qrcode"></i> Connect with WalletConnect
+            <i class="fas fa-qrcode" aria-hidden="true"></i> Connect with WalletConnect
             <span id="loaderWalletConnect" class="loader" style="display: none;"></span>
         </button>
         <!-- Footer Section -->
         <div class="footer">
-            Powered by <a href="https://walletconnect.com" target="_blank">WalletConnect</a>
+            Powered by <a href="https://walletconnect.com" target="_blank" rel="noopener">WalletConnect</a>
         </div>
     </div>
 
     <!-- Embedded JavaScript for Wallet Connection -->
-    <!-- Include WalletConnect Web3 Provider via CDN -->
+    <!-- Include WalletConnect Web3 Provider v1 via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
     <!-- Include Web3.js -->
     <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
@@ -225,12 +225,16 @@
             loaderWalletConnect.style.display = 'inline-block'; // Show loader
             try {
                 // Initialize WalletConnectProvider
+                console.log("Initializing WalletConnectProvider...");
                 const provider = new WalletConnectProvider.default({
-                    infuraId: "e19dd5612ad546b38b7d6993e4a1857f", // Replace with your actual Infura Project ID
+                    infuraId: "e19dd5612ad546b38b7d6993e4a1857f", // ✅ **Replace this with your actual Infura Project ID**
+                    bridge: "https://bridge.walletconnect.org", // ✅ **Ensure the bridge URL is correct**
+                    qrcode: true, // Enable QR code modal
                 });
-                console.log("WalletConnect Provider initialized.");
+                console.log("WalletConnect Provider initialized:", provider);
 
                 // Enable session (triggers QR Code modal)
+                console.log("Enabling WalletConnect session...");
                 await provider.enable();
                 console.log("WalletConnect session enabled.");
 
