@@ -2,26 +2,186 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Wallet Connect Mini App</title>
-    <!-- Include WalletConnect v2 via CDN -->
-    <script src="https://unpkg.com/@walletconnect/client@2.0.0/dist/umd/index.min.js"></script>
-    <script src="https://unpkg.com/@walletconnect/web3-provider@2.0.0/dist/umd/index.min.js"></script>
-    <!-- Include Web3.js -->
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+    <title>Connect Your Wallet</title>
+    <!-- Responsive Meta Tag -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Embedded CSS for Styling -->
+    <style>
+        /* Reset CSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1f4037 0%, #99f2c8 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            padding: 20px;
+        }
+
+        /* Container */
+        .container {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-10px);
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1 i {
+            font-size: 1.2em;
+            color: #4caf50;
+        }
+
+        /* Description */
+        .description {
+            font-size: 1em;
+            margin-bottom: 30px;
+        }
+
+        /* Connect Button */
+        .connect-btn {
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1em;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .connect-btn:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .connect-btn:active {
+            transform: scale(0.95);
+        }
+
+        .connect-btn i {
+            font-size: 1.2em;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        .footer a {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        /* Loader Styling */
+        .loader {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #4caf50; /* Green */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 500px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .connect-btn {
+                padding: 12px 20px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Connect Your Wallet</h1>
-    <button id="connect">Connect Wallet</button>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1><i class="fas fa-wallet"></i> Connect Your Wallet</h1>
+        </div>
+        <!-- Description Section -->
+        <div class="description">
+            Seamlessly connect your cryptocurrency wallet to access exclusive features and manage your assets securely.
+        </div>
+        <!-- Connect Wallet Button -->
+        <button class="connect-btn" id="connectWallet">
+            <i class="fas fa-link"></i> Connect Wallet
+            <span id="loader" class="loader" style="display: none;"></span>
+        </button>
+        <!-- Footer Section -->
+        <div class="footer">
+            Powered by <a href="https://walletconnect.com" target="_blank">WalletConnect</a>
+        </div>
+    </div>
 
+    <!-- Embedded JavaScript for Wallet Connection -->
+    <script src="https://unpkg.com/@walletconnect/client@2.0.0/dist/umd/index.min.js"></script>
+    <script src="https://unpkg.com/@walletconnect/web3-provider@2.0.0/dist/umd/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
     <script>
-        const connectButton = document.getElementById('connect');
+        // Select Elements
+        const connectButton = document.getElementById('connectWallet');
+        const loader = document.getElementById('loader');
 
         connectButton.addEventListener('click', async () => {
             console.log("Connect Wallet button clicked.");
+            loader.style.display = 'inline-block'; // Show loader
             try {
                 // Initialize WalletConnect Provider v2
                 const provider = new WalletConnectProvider.Web3Provider({
-                    projectId: "c3123a5e0f253e16bc4707e936242ec2", // Replace with your actual projectId
+                    projectId: "YOUR_PROJECT_ID", // Replace with your actual projectId
                     chains: [1], // Ethereum Mainnet
                     methods: ["eth_sendTransaction", "personal_sign"],
                     events: ["chainChanged", "accountsChanged", "disconnect"]
@@ -52,6 +212,8 @@
             } catch (error) {
                 console.error("Error connecting wallet:", error);
                 alert("Failed to connect wallet. Please try again.");
+            } finally {
+                loader.style.display = 'none'; // Hide loader
             }
         });
     </script>
