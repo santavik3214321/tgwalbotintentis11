@@ -181,17 +181,21 @@
         const loaderWallet = document.getElementById('loaderWallet');
 
         // Initialize Web3Modal
-const providerOptions = {
-    walletconnect: {
-        package: WalletConnectProvider.default,
-        options: {
-            infuraId: "e19dd5612ad546b38b7d6993e4a1857f", // Replace with your actual Infura Project ID
-            bridge: "https://bridge.walletconnect.org", // Correct bridge URL
-            qrcode: true, // Ensure QR code modal is enabled
-        }
-    },
-    // Add other providers here if needed
-};
+        const providerOptions = {
+            walletconnect: {
+                package: window.WalletConnectProvider.default, // required
+                options: {
+                    projectId: "563760066c2de3b7804c6ddc6a089127", // ✅ **Replace with your WalletConnect Project ID**
+                    rpc: {
+                        // Optional: Define custom RPC endpoints if needed
+                        // 1: "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID",
+                        // 4: "https://rinkeby.infura.io/v3/YOUR_INFURA_PROJECT_ID",
+                    },
+                }
+            },
+            // You can add more providers here if needed
+            // For example, Coinbase Wallet, Fortmatic, etc.
+        };
 
         const web3Modal = new window.Web3Modal.default({
             cacheProvider: false, // optional
