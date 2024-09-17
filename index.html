@@ -254,10 +254,9 @@
     </div>
 
     <!-- Embedded JavaScript for Wallet Connection -->
-    <!-- Include Thirdweb SDK via Skypack CDN -->
+    <!-- Include Thirdweb SDK via esm.sh CDN with a specific version -->
     <script type="module">
-        // Import Thirdweb SDK from Skypack
-        import { ThirdwebSDK, createWallet } from 'https://cdn.skypack.dev/@thirdweb-dev/sdk';
+        import { ThirdwebSDK, createWallet } from 'https://esm.sh/@thirdweb-dev/sdk@3.5.0';
 
         // Initialize Thirdweb SDK
         const clientId = "380e61e4dbd119959409bd3a6b494d26"; // ✅ **Replace with your Thirdweb Project ID**
