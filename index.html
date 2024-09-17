@@ -253,20 +253,21 @@
         </div>
     </div>
 
+    <!-- Embedded JavaScript for Wallet Connection -->
     <!-- Include Thirdweb SDK via UMD CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@thirdweb-dev/sdk@latest/dist/thirdweb.umd.min.js"></script>
+    <script src="https://unpkg.com/@thirdweb-dev/sdk@latest/dist/thirdweb.umd.js"></script>
     <script>
         // Ensure the SDK is loaded
         if (!window.thirdweb) {
             alert("Thirdweb SDK failed to load.");
+            console.error("Thirdweb SDK failed to load.");
+        } else {
+            console.log("Thirdweb SDK loaded successfully.");
         }
 
         // Initialize Thirdweb SDK
         const clientId = "380e61e4dbd119959409bd3a6b494d26"; // ✅ **Replace with your Thirdweb Project ID**
         const sdk = new thirdweb.ThirdwebSDK("ethereum"); // Specify the desired network (e.g., "ethereum")
-
-        // Set the project ID
-        sdk.setProject(clientId);
 
         // Define wallets
         const wallets = [
