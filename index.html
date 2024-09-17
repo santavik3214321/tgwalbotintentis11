@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Embedded CSS for Styling -->
     <style>
+        /* Basic Styling for the Page */
         body {
             font-family: 'Roboto', sans-serif;
             background: linear-gradient(135deg, #1f4037 0%, #99f2c8 100%);
@@ -28,10 +29,14 @@
             text-align: center;
             max-width: 500px;
             width: 100%;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
         }
         .header h1 {
             font-size: 2em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
             color: #4caf50;
         }
         .connect-btn {
@@ -42,11 +47,48 @@
             font-size: 1em;
             border-radius: 50px;
             cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
             width: 100%;
-            margin-bottom: 15px;
+            margin-top: 20px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
         .connect-btn:hover {
             background-color: #45a049;
+            transform: scale(1.05);
+        }
+        .connect-btn:active {
+            transform: scale(0.95);
+        }
+        .connect-btn i {
+            font-size: 1.2em;
+        }
+        /* Loader Styling */
+        .loader {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #4caf50; /* Green */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Footer */
+        .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+        .footer a {
+            color: #fff;
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -57,49 +99,48 @@
         </div>
         <button class="connect-btn" id="connectWallet">
             <i class="fas fa-wallet"></i> Connect Wallet
+            <div class="loader" id="loaderWallet"></div>
         </button>
+        <div class="footer">
+            Powered by <a href="https://magic.link" target="_blank" rel="noopener">Magic</a>
+        </div>
     </div>
 
     <!-- Import ethers.js -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.0/dist/ethers.min.js"></script>
-    <!-- Import Web3Modal -->
-    <script src="https://unpkg.com/web3modal"></script>
-    <!-- Import WalletConnect Provider -->
-    <script src="https://unpkg.com/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
+    <!-- Import Magic SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/magic-sdk@latest/dist/magic.min.js"></script>
 
     <script>
-        // Define provider options for Web3Modal
-        const providerOptions = {
-            walletconnect: {
-                package: WalletConnectProvider.default,
-                options: {
-                    infuraId: "e19dd5612ad546b38b7d6993e4a1857f", // Replace with your Infura Project ID
-                    rpc: {
-                        1: "https://mainnet.infura.io/v3/e19dd5612ad546b38b7d6993e4a1857f", // Ensure Infura Project ID is added here
-                        56: "https://bsc-dataseed.binance.org/", // Binance Smart Chain
-                        137: "https://polygon-rpc.com/" // Polygon Network
-                    },
-                    network: 'mainnet', // Specify network (e.g., 'mainnet', 'binance', 'polygon')
-                },
-            },
-        };
-
-        // Initialize Web3Modal
-        const web3Modal = new window.Web3Modal.default({
-            cacheProvider: false,
-            providerOptions,
-        });
+        // Initialize Magic
+        const magic = new Magic('pk_live_EAC4B25BC7F5C76F'); // Replace with your Magic Publishable API Key
 
         // Ethers.js provider and signer
         let provider;
         let signer;
 
+        // Select Elements
+        const connectWalletBtn = document.getElementById('connectWallet');
+        const loaderWallet = document.getElementById('loaderWallet');
+
         // Function to connect wallet
         async function connectWallet() {
             try {
-                // Open Web3Modal to connect
-                const web3ModalProvider = await web3Modal.connect();
-                provider = new ethers.providers.Web3Provider(web3ModalProvider);
+                loaderWallet.style.display = 'inline-block'; // Show loader
+                connectWalletBtn.disabled = true; // Disable button to prevent multiple clicks
+
+                // Check if user is already logged in
+                const isLoggedIn = await magic.user.isLoggedIn();
+
+                if (!isLoggedIn) {
+                    // Prompt user to login
+                    await magic.auth.loginWithMagicLink({ email: 'user@example.com' }); // You can customize this
+                }
+
+                // Get ethers provider
+                provider = new ethers.providers.Web3Provider(magic.rpcProvider);
+
+                // Get signer
                 signer = provider.getSigner();
 
                 // Get the connected wallet address
@@ -116,11 +157,14 @@
             } catch (error) {
                 console.error("Failed to connect wallet:", error);
                 alert("Failed to connect wallet. Please try again.");
+            } finally {
+                loaderWallet.style.display = 'none'; // Hide loader
+                connectWalletBtn.disabled = false; // Re-enable button
             }
         }
 
         // Add event listener to connect wallet button
-        document.getElementById('connectWallet').addEventListener('click', connectWallet);
+        connectWalletBtn.addEventListener('click', connectWallet);
     </script>
 </body>
 </html>
