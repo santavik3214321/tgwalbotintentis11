@@ -1,62 +1,46 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2487">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000; min-height: 14.0px}
-    span.s1 {font-kerning: none}
-  </style>
+    <title>Wallet Connect Mini App</title>
+    <script src="https://unpkg.com/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
 </head>
 <body>
-<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;Wallet Connect Mini App&lt;/title&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://unpkg.com/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;h1&gt;Connect Your Wallet&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;button id="connect"&gt;Connect Wallet&lt;/button&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const connectButton = document.getElementById('connect');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>connectButton.addEventListener('click', async () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>try {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Initialize WalletConnect Provider</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const provider = new WalletConnectProvider.default({</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>rpc: {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>1: "https://mainnet.infura.io/v3/e19dd5612ad546b38b7d6993e4a1857f"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Enable session (triggers QR Code modal)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>await provider.enable();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Create Web3 instance</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const web3 = new Web3(provider);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Get list of accounts</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const accounts = await web3.eth.getAccounts();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const walletAddress = accounts[0];</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Send wallet address back to Telegram bot</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>window.Telegram.WebApp.sendData(walletAddress);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Close the Web App</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>window.Telegram.WebApp.close();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} catch (error) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>console.error("Error connecting wallet:", error);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>alert("Failed to connect wallet. Please try again.");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+    <h1>Connect Your Wallet</h1>
+    <button id="connect">Connect Wallet</button>
+
+    <script>
+        const connectButton = document.getElementById('connect');
+
+        connectButton.addEventListener('click', async () => {
+            try {
+                // Initialize WalletConnect Provider
+                const provider = new WalletConnectProvider.default({
+                    rpc: {
+                        1: "https://mainnet.infura.io/v3/e19dd5612ad546b38b7d6993e4a1857f"
+                    },
+                });
+
+                // Enable session (triggers QR Code modal)
+                await provider.enable();
+
+                // Create Web3 instance
+                const web3 = new Web3(provider);
+
+                // Get list of accounts
+                const accounts = await web3.eth.getAccounts();
+                const walletAddress = accounts[0];
+
+                // Send wallet address back to Telegram bot
+                window.Telegram.WebApp.sendData(walletAddress);
+
+                // Close the Web App
+                window.Telegram.WebApp.close();
+            } catch (error) {
+                console.error("Error connecting wallet:", error);
+                alert("Failed to connect wallet. Please try again.");
+            }
+        });
+    </script>
 </body>
 </html>
