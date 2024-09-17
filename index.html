@@ -71,7 +71,7 @@
             margin-bottom: 30px;
         }
 
-        /* Connect Buttons */
+        /* Connect Wallet Button */
         .connect-btn {
             background-color: #4caf50;
             color: #fff;
@@ -157,15 +157,10 @@
         <div class="description">
             Seamlessly connect your cryptocurrency wallet to access exclusive features and manage your assets securely.
         </div>
-        <!-- Connect with MetaMask Button -->
-        <button class="connect-btn" id="connectMetaMask">
-            <i class="fab fa-ethereum" aria-hidden="true"></i> Connect with MetaMask
-            <span id="loaderMetaMask" class="loader" style="display: none;"></span>
-        </button>
-        <!-- Connect with WalletConnect Button -->
-        <button class="connect-btn" id="connectWalletConnect">
-            <i class="fas fa-qrcode" aria-hidden="true"></i> Connect with WalletConnect
-            <span id="loaderWalletConnect" class="loader" style="display: none;"></span>
+        <!-- Connect Wallet Button -->
+        <button class="connect-btn" id="connectWallet">
+            <i class="fas fa-wallet" aria-hidden="true"></i> Connect Wallet
+            <span id="loaderWallet" class="loader" style="display: none;"></span>
         </button>
         <!-- Footer Section -->
         <div class="footer">
@@ -174,93 +169,89 @@
     </div>
 
     <!-- Embedded JavaScript for Wallet Connection -->
-    <!-- Include WalletConnect Web3 Provider v1 via CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
+    <!-- Include Web3Modal via CDN -->
+    <script src="https://unpkg.com/web3modal@1.9.0/dist/index.js"></script>
+    <!-- Include WalletConnect Web3 Provider via CDN -->
+    <script src="https://unpkg.com/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
     <!-- Include Web3.js -->
     <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
     <script>
         // Select Elements
-        const connectMetaMaskBtn = document.getElementById('connectMetaMask');
-        const loaderMetaMask = document.getElementById('loaderMetaMask');
-        const connectWalletConnectBtn = document.getElementById('connectWalletConnect');
-        const loaderWalletConnect = document.getElementById('loaderWalletConnect');
+        const connectWalletBtn = document.getElementById('connectWallet');
+        const loaderWallet = document.getElementById('loaderWallet');
 
-        // MetaMask Connection Handler
-        connectMetaMaskBtn.addEventListener('click', async () => {
-            console.log("Connect with MetaMask button clicked.");
-            loaderMetaMask.style.display = 'inline-block'; // Show loader
-            try {
-                // Check if MetaMask is installed
-                if (typeof window.ethereum !== 'undefined') {
-                    console.log("MetaMask detected. Attempting to connect directly.");
-                    // Request account access
-                    await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    // Create Web3 instance
-                    const web3 = new Web3(window.ethereum);
-                    // Get list of accounts
-                    const accounts = await web3.eth.getAccounts();
-                    console.log("Accounts retrieved via MetaMask:", accounts);
-                    const walletAddress = accounts[0];
-                    // Send wallet address back to Telegram bot
-                    window.Telegram.WebApp.sendData(walletAddress);
-                    console.log("Wallet address sent to Telegram bot via MetaMask.");
-                    // Close the Web App
-                    window.Telegram.WebApp.close();
-                    console.log("Web App closed.");
-                } else {
-                    console.log("MetaMask not detected.");
-                    alert("MetaMask is not installed. Please install MetaMask or use another wallet.");
+        // Initialize Web3Modal
+        const providerOptions = {
+            walletconnect: {
+                package: WalletConnectProvider.default, // required
+                options: {
+                    infuraId: "e19dd5612ad546b38b7d6993e4a1857f", // ✅ **Replace this with your actual Infura Project ID**
                 }
-            } catch (error) {
-                console.error("Error connecting MetaMask:", error);
-                alert(`Failed to connect with MetaMask: ${error.message}`);
-            } finally {
-                loaderMetaMask.style.display = 'none'; // Hide loader
-            }
+            },
+            // You can add more providers here if needed
+            // For example, Coinbase Wallet, Fortmatic, etc.
+        };
+
+        const web3Modal = new window.Web3Modal.default({
+            cacheProvider: false, // optional
+            providerOptions, // required
+            disableInjectedProvider: false, // optional. For MetaMask / TrustWallet
         });
 
-        // WalletConnect Connection Handler
-        connectWalletConnectBtn.addEventListener('click', async () => {
-            console.log("Connect with WalletConnect button clicked.");
-            loaderWalletConnect.style.display = 'inline-block'; // Show loader
+        // Connect Wallet Handler
+        connectWalletBtn.addEventListener('click', async () => {
+            console.log("Connect Wallet button clicked.");
+            loaderWallet.style.display = 'inline-block'; // Show loader
             try {
-                // Initialize WalletConnectProvider
-                console.log("Initializing WalletConnectProvider...");
-                const provider = new WalletConnectProvider.default({
-                    infuraId: "e19dd5612ad546b38b7d6993e4a1857f", // ✅ **Replace this with your actual Infura Project ID**
-                    bridge: "https://bridge.walletconnect.org", // ✅ **Ensure the bridge URL is correct**
-                    qrcode: true, // Enable QR code modal
-                });
-                console.log("WalletConnect Provider initialized:", provider);
+                const provider = await web3Modal.connect();
+                console.log("Provider connected:", provider);
 
-                // Enable session (triggers QR Code modal)
-                console.log("Enabling WalletConnect session...");
-                await provider.enable();
-                console.log("WalletConnect session enabled.");
-
-                // Create Web3 instance
                 const web3 = new Web3(provider);
-                console.log("Web3 instance created.");
-
-                // Get list of accounts
                 const accounts = await web3.eth.getAccounts();
                 console.log("Accounts retrieved:", accounts);
                 const walletAddress = accounts[0];
-                console.log("Wallet Address:", walletAddress);
 
                 // Send wallet address back to Telegram bot
                 window.Telegram.WebApp.sendData(walletAddress);
-                console.log("Wallet address sent to Telegram bot via WalletConnect.");
-
+                console.log("Wallet address sent to Telegram bot.");
+                
                 // Close the Web App
                 window.Telegram.WebApp.close();
                 console.log("Web App closed.");
             } catch (error) {
-                console.error("Error connecting via WalletConnect:", error);
-                alert(`Failed to connect with WalletConnect: ${error.message}`);
-                loaderWalletConnect.style.display = 'none'; // Hide loader
+                console.error("Error connecting wallet:", error);
+                alert(`Failed to connect wallet: ${error.message}`);
+            } finally {
+                loaderWallet.style.display = 'none'; // Hide loader
             }
         });
+
+        // Optional: Listen for account changes
+        // This ensures the app responds to wallet account changes
+        window.Telegram.WebApp.ready();
+
+        // Optional: Handle wallet disconnection
+        if (web3Modal.cachedProvider) {
+            web3Modal.connect().then(provider => {
+                provider.on("disconnect", (code, reason) => {
+                    console.log("Wallet disconnected:", code, reason);
+                });
+
+                provider.on("accountsChanged", (accounts) => {
+                    console.log("Accounts changed:", accounts);
+                });
+
+                provider.on("chainChanged", (chainId) => {
+                    console.log("Chain changed:", chainId);
+                });
+
+                provider.on("networkChanged", (networkId) => {
+                    console.log("Network changed:", networkId);
+                });
+            }).catch(e => {
+                console.log("Could not connect to cached provider:", e);
+            });
+        }
     </script>
 </body>
 </html>
