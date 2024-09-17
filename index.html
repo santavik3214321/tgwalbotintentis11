@@ -169,10 +169,10 @@
     </div>
 
     <!-- Embedded JavaScript for Wallet Connection -->
-    <!-- Include Web3Modal via CDN -->
-    <script src="https://unpkg.com/web3modal@1.9.0/dist/index.js"></script>
-    <!-- Include WalletConnect Web3 Provider via CDN -->
-    <script src="https://unpkg.com/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
+    <!-- Include Web3Modal v2 via CDN -->
+    <script src="https://unpkg.com/web3modal@2.0.0-beta.10/dist/index.js"></script>
+    <!-- Include WalletConnect v2 Web3 Provider via CDN -->
+    <script src="https://unpkg.com/@walletconnect/web3-provider@2.3.1/dist/umd/index.min.js"></script>
     <!-- Include Web3.js -->
     <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
     <script>
@@ -180,21 +180,17 @@
         const connectWalletBtn = document.getElementById('connectWallet');
         const loaderWallet = document.getElementById('loaderWallet');
 
-        // Initialize Web3Modal
+        // Initialize Web3Modal with WalletConnect v2
         const providerOptions = {
             walletconnect: {
                 package: window.WalletConnectProvider.default, // required
                 options: {
                     projectId: "563760066c2de3b7804c6ddc6a089127", // ✅ **Replace with your WalletConnect Project ID**
-                    rpc: {
-                        // Optional: Define custom RPC endpoints if needed
-                        // 1: "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID",
-                        // 4: "https://rinkeby.infura.io/v3/YOUR_INFURA_PROJECT_ID",
-                    },
-                }
+                    chains: [1, 3, 4, 5, 42], // Optional: Supported chains (e.g., Mainnet, Ropsten, Rinkeby, Goerli, Kovan)
+                    showQrModal: true, // Optional: Enable QR modal
+                },
             },
-            // You can add more providers here if needed
-            // For example, Coinbase Wallet, Fortmatic, etc.
+            // Add other providers here if needed (e.g., Coinbase Wallet, Fortmatic)
         };
 
         const web3Modal = new window.Web3Modal.default({
@@ -208,11 +204,11 @@
             console.log("Connect Wallet button clicked.");
             loaderWallet.style.display = 'inline-block'; // Show loader
             try {
-                const provider = await web3Modal.connect();
+                const provider = await web3Modal.connect(); // Open Web3Modal
                 console.log("Provider connected:", provider);
 
-                const web3 = new Web3(provider);
-                const accounts = await web3.eth.getAccounts();
+                const web3 = new Web3(provider); // Initialize Web3 with the provider
+                const accounts = await web3.eth.getAccounts(); // Get user accounts
                 console.log("Accounts retrieved:", accounts);
                 const walletAddress = accounts[0];
 
@@ -231,28 +227,30 @@
             }
         });
 
-        // Optional: Listen for account changes
+        // Optional: Listen for provider events to handle account or network changes
         // This ensures the app responds to wallet account changes
         window.Telegram.WebApp.ready();
 
-        // Optional: Handle wallet disconnection
+        // Optional: Handle wallet disconnection and other events
         if (web3Modal.cachedProvider) {
             web3Modal.connect().then(provider => {
-                provider.on("disconnect", (code, reason) => {
-                    console.log("Wallet disconnected:", code, reason);
-                });
+                if (provider.on) {
+                    provider.on("disconnect", (code, reason) => {
+                        console.log("Wallet disconnected:", code, reason);
+                    });
 
-                provider.on("accountsChanged", (accounts) => {
-                    console.log("Accounts changed:", accounts);
-                });
+                    provider.on("accountsChanged", (accounts) => {
+                        console.log("Accounts changed:", accounts);
+                    });
 
-                provider.on("chainChanged", (chainId) => {
-                    console.log("Chain changed:", chainId);
-                });
+                    provider.on("chainChanged", (chainId) => {
+                        console.log("Chain changed:", chainId);
+                    });
 
-                provider.on("networkChanged", (networkId) => {
-                    console.log("Network changed:", networkId);
-                });
+                    provider.on("networkChanged", (networkId) => {
+                        console.log("Network changed:", networkId);
+                    });
+                }
             }).catch(e => {
                 console.log("Could not connect to cached provider:", e);
             });
