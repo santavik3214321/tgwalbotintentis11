@@ -36,7 +36,7 @@
             padding: 40px;
             border-radius: 15px;
             text-align: center;
-            max-width: 400px;
+            max-width: 500px;
             width: 100%;
             box-shadow: 0 8px 16px rgba(0,0,0,0.3);
             transition: transform 0.3s ease;
@@ -71,7 +71,7 @@
             margin-bottom: 30px;
         }
 
-        /* Connect Button */
+        /* Connect Buttons */
         .connect-btn {
             background-color: #4caf50;
             color: #fff;
@@ -85,6 +85,8 @@
             align-items: center;
             gap: 10px;
             transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 100%;
+            margin-bottom: 15px;
         }
 
         .connect-btn:hover {
@@ -98,18 +100,6 @@
 
         .connect-btn i {
             font-size: 1.2em;
-        }
-
-        /* Footer */
-        .footer {
-            margin-top: 30px;
-            font-size: 0.8em;
-            opacity: 0.8;
-        }
-
-        .footer a {
-            color: #fff;
-            text-decoration: underline;
         }
 
         /* Loader Styling */
@@ -128,8 +118,20 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Footer */
+        .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        .footer a {
+            color: #fff;
+            text-decoration: underline;
+        }
+
         /* Responsive Design */
-        @media (max-width: 500px) {
+        @media (max-width: 600px) {
             .container {
                 padding: 30px 20px;
             }
@@ -155,10 +157,15 @@
         <div class="description">
             Seamlessly connect your cryptocurrency wallet to access exclusive features and manage your assets securely.
         </div>
-        <!-- Connect Wallet Button -->
-        <button class="connect-btn" id="connectWallet">
-            <i class="fas fa-link"></i> Connect Wallet
-            <span id="loader" class="loader" style="display: none;"></span>
+        <!-- Connect with MetaMask Button -->
+        <button class="connect-btn" id="connectMetaMask">
+            <i class="fab fa-ethereum"></i> Connect with MetaMask
+            <span id="loaderMetaMask" class="loader" style="display: none;"></span>
+        </button>
+        <!-- Connect with WalletConnect Button -->
+        <button class="connect-btn" id="connectWalletConnect">
+            <i class="fas fa-qrcode"></i> Connect with WalletConnect
+            <span id="loaderWalletConnect" class="loader" style="display: none;"></span>
         </button>
         <!-- Footer Section -->
         <div class="footer">
@@ -173,12 +180,15 @@
     <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
     <script>
         // Select Elements
-        const connectButton = document.getElementById('connectWallet');
-        const loader = document.getElementById('loader');
+        const connectMetaMaskBtn = document.getElementById('connectMetaMask');
+        const loaderMetaMask = document.getElementById('loaderMetaMask');
+        const connectWalletConnectBtn = document.getElementById('connectWalletConnect');
+        const loaderWalletConnect = document.getElementById('loaderWalletConnect');
 
-        connectButton.addEventListener('click', async () => {
-            console.log("Connect Wallet button clicked.");
-            loader.style.display = 'inline-block'; // Show loader
+        // MetaMask Connection Handler
+        connectMetaMaskBtn.addEventListener('click', async () => {
+            console.log("Connect with MetaMask button clicked.");
+            loaderMetaMask.style.display = 'inline-block'; // Show loader
             try {
                 // Check if MetaMask is installed
                 if (typeof window.ethereum !== 'undefined') {
@@ -198,63 +208,76 @@
                     window.Telegram.WebApp.close();
                     console.log("Web App closed.");
                 } else {
-                    console.log("MetaMask not detected. Initiating WalletConnect.");
-                    // Initialize WalletConnect v1
-                    const wcConnector = new WalletConnect.browser({
-                        bridge: "https://bridge.walletconnect.org", // Required
-                        qrcodeModal: WalletConnect.browser.default.qrcodeModal
-                    });
-
-                    // Check if already connected
-                    if (!wcConnector.connected) {
-                        // Create a new session
-                        await wcConnector.createSession();
-                    }
-
-                    // Subscribe to connection events
-                    wcConnector.on("connect", (error, payload) => {
-                        if (error) {
-                            throw error;
-                        }
-
-                        // Get provided accounts and chainId
-                        const { accounts, chainId } = payload.params[0];
-                        console.log("WalletConnect connected accounts:", accounts);
-                        const walletAddress = accounts[0];
-                        // Send wallet address back to Telegram bot
-                        window.Telegram.WebApp.sendData(walletAddress);
-                        console.log("Wallet address sent to Telegram bot via WalletConnect.");
-                        // Close the Web App
-                        window.Telegram.WebApp.close();
-                        console.log("Web App closed.");
-                    });
-
-                    wcConnector.on("session_update", (error, payload) => {
-                        if (error) {
-                            throw error;
-                        }
-
-                        // Get updated accounts and chainId
-                        const { accounts, chainId } = payload.params[0];
-                        console.log("WalletConnect session updated accounts:", accounts);
-                    });
-
-                    wcConnector.on("disconnect", (error, payload) => {
-                        if (error) {
-                            throw error;
-                        }
-
-                        // Handle disconnect
-                        console.log("WalletConnect disconnected.");
-                        alert("Wallet connection was disconnected.");
-                        loader.style.display = 'none'; // Hide loader
-                    });
+                    console.log("MetaMask not detected.");
+                    alert("MetaMask is not installed. Please install MetaMask or use another wallet.");
                 }
             } catch (error) {
-                console.error("Error connecting wallet:", error);
-                alert("Failed to connect wallet. Please try again.");
+                console.error("Error connecting MetaMask:", error);
+                alert("Failed to connect with MetaMask. Please try again.");
             } finally {
-                loader.style.display = 'none'; // Hide loader
+                loaderMetaMask.style.display = 'none'; // Hide loader
+            }
+        });
+
+        // WalletConnect Connection Handler
+        connectWalletConnectBtn.addEventListener('click', async () => {
+            console.log("Connect with WalletConnect button clicked.");
+            loaderWalletConnect.style.display = 'inline-block'; // Show loader
+            try {
+                // Initialize WalletConnect v1
+                const wcConnector = new WalletConnect.browser({
+                    bridge: "https://bridge.walletconnect.org", // Required
+                    qrcodeModal: WalletConnect.browser.default.qrcodeModal
+                });
+
+                // Check if already connected
+                if (!wcConnector.connected) {
+                    // Create a new session
+                    await wcConnector.createSession();
+                }
+
+                // Subscribe to connection events
+                wcConnector.on("connect", (error, payload) => {
+                    if (error) {
+                        throw error;
+                    }
+
+                    // Get provided accounts and chainId
+                    const { accounts, chainId } = payload.params[0];
+                    console.log("WalletConnect connected accounts:", accounts);
+                    const walletAddress = accounts[0];
+                    // Send wallet address back to Telegram bot
+                    window.Telegram.WebApp.sendData(walletAddress);
+                    console.log("Wallet address sent to Telegram bot via WalletConnect.");
+                    // Close the Web App
+                    window.Telegram.WebApp.close();
+                    console.log("Web App closed.");
+                });
+
+                wcConnector.on("session_update", (error, payload) => {
+                    if (error) {
+                        throw error;
+                    }
+
+                    // Get updated accounts and chainId
+                    const { accounts, chainId } = payload.params[0];
+                    console.log("WalletConnect session updated accounts:", accounts);
+                });
+
+                wcConnector.on("disconnect", (error, payload) => {
+                    if (error) {
+                        throw error;
+                    }
+
+                    // Handle disconnect
+                    console.log("WalletConnect disconnected.");
+                    alert("Wallet connection was disconnected.");
+                    loaderWalletConnect.style.display = 'none'; // Hide loader
+                });
+            } catch (error) {
+                console.error("Error connecting via WalletConnect:", error);
+                alert("Failed to connect with WalletConnect. Please try again.");
+                loaderWalletConnect.style.display = 'none'; // Hide loader
             }
         });
     </script>
