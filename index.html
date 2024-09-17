@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Web3Modal CSS (Optional but recommended for better styling) -->
+    <link rel="stylesheet" href="https://unpkg.com/web3modal/dist/index.css" />
     <!-- Embedded CSS for Styling -->
     <style>
         /* Basic Styling for the Page */
@@ -30,6 +32,10 @@
             max-width: 500px;
             width: 100%;
             box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+        .container:hover {
+            transform: translateY(-10px);
         }
         .header h1 {
             font-size: 2em;
@@ -102,18 +108,46 @@
             <div class="loader" id="loaderWallet"></div>
         </button>
         <div class="footer">
-            Powered by <a href="https://magic.link" target="_blank" rel="noopener">Magic</a>
+            Powered by <a href="https://web3modal.com/" target="_blank" rel="noopener">Web3Modal</a>
         </div>
     </div>
 
     <!-- Import ethers.js -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.0/dist/ethers.min.js"></script>
-    <!-- Import Magic SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/magic-sdk@latest/dist/magic.min.js"></script>
+    <!-- Import Web3Modal -->
+    <script src="https://unpkg.com/web3modal"></script>
+    <!-- Import WalletConnect Provider -->
+    <script src="https://unpkg.com/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
 
     <script>
-        // Initialize Magic
-        const magic = new Magic('pk_live_EAC4B25BC7F5C76F'); // Replace with your Magic Publishable API Key
+        // Replace with your Infura Project ID
+        const INFURA_ID = "e19dd5612ad546b38b7d6993e4a1857f";
+
+        // Define provider options for Web3Modal
+        const providerOptions = {
+            walletconnect: {
+                package: window.WalletConnectProvider.default, // required
+                options: {
+                    infuraId: INFURA_ID, // required
+                    rpc: {
+                        1: `https://mainnet.infura.io/v3/${INFURA_ID}`, // Ethereum Mainnet
+                        3: `https://ropsten.infura.io/v3/${INFURA_ID}`, // Ropsten Testnet
+                        4: `https://rinkeby.infura.io/v3/${INFURA_ID}`, // Rinkeby Testnet
+                        5: `https://goerli.infura.io/v3/${INFURA_ID}`, // Goerli Testnet
+                        42: `https://kovan.infura.io/v3/${INFURA_ID}`, // Kovan Testnet
+                        // Add other networks if needed
+                    },
+                    network: "mainnet", // Optional. Specifies default network
+                },
+            },
+            // You can add more providers here if needed
+        };
+
+        // Initialize Web3Modal
+        const web3Modal = new window.Web3Modal.default({
+            cacheProvider: false, // optional
+            providerOptions, // required
+        });
 
         // Ethers.js provider and signer
         let provider;
@@ -129,18 +163,11 @@
                 loaderWallet.style.display = 'inline-block'; // Show loader
                 connectWalletBtn.disabled = true; // Disable button to prevent multiple clicks
 
-                // Check if user is already logged in
-                const isLoggedIn = await magic.user.isLoggedIn();
+                // Open Web3Modal to select wallet
+                const instance = await web3Modal.connect();
 
-                if (!isLoggedIn) {
-                    // Prompt user to login
-                    await magic.auth.loginWithMagicLink({ email: 'user@example.com' }); // You can customize this
-                }
-
-                // Get ethers provider
-                provider = new ethers.providers.Web3Provider(magic.rpcProvider);
-
-                // Get signer
+                // Wrap with ethers.js provider
+                provider = new ethers.providers.Web3Provider(instance);
                 signer = provider.getSigner();
 
                 // Get the connected wallet address
