@@ -21,7 +21,7 @@
             try {
                 // Initialize WalletConnect Provider v2
                 const provider = new WalletConnectProvider.Web3Provider({
-                    projectId: "c3123a5e0f253e16bc4707e936242ec2", // Obtain from WalletConnect
+                    projectId: "c3123a5e0f253e16bc4707e936242ec2", // Replace with your actual projectId
                     chains: [1], // Ethereum Mainnet
                     methods: ["eth_sendTransaction", "personal_sign"],
                     events: ["chainChanged", "accountsChanged", "disconnect"]
