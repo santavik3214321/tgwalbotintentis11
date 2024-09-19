@@ -7,6 +7,8 @@
 
     <!-- Include Onboard.js from the CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@web3-onboard/core@1.26.0/dist/web3-onboard.umd.min.js"></script>
+
+    <!-- Include the Injected Wallets Plugin for Onboard.js (MetaMask, Trust Wallet, etc.) -->
     <script src="https://cdn.jsdelivr.net/npm/@web3-onboard/injected-wallets@1.26.0/dist/web3-onboard-injected-wallets.umd.min.js"></script>
 
     <style>
@@ -73,38 +75,61 @@
     </div>
 
     <script>
+        // Setup Onboard.js and Injected Wallets
         let onboard;
-        const connectButton = document.getElementById('connect-wallet');
 
-        connectButton.addEventListener('click', async () => {
-            // Initialize Onboard.js with supported wallets
+        window.onload = async function() {
+            console.log("Initializing Onboard.js...");
+
+            // Initialize Onboard.js with supported wallets and chains
             onboard = Onboard.Onboard({
-                wallets: [Onboard.injectedWallets()],
-                chains: [{ id: '0x1', token: 'ETH', label: 'Ethereum Mainnet', rpcUrl: 'https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID' }]
+                wallets: [Onboard.injectedWallets()],  // Injected Wallets like MetaMask, Trust Wallet
+                chains: [{ 
+                    id: '0x1',  // Ethereum Mainnet
+                    token: 'ETH',
+                    label: 'Ethereum Mainnet',
+                    rpcUrl: 'https://mainnet.infura.io/v3/e19dd5612ad546b38b7d6993e4a1857f'  // Replace with your Infura or RPC URL
+                }]
             });
 
-            // Request user to connect a wallet
-            const wallets = await onboard.connectWallet();
+            console.log("Onboard.js Initialized.");
+        };
 
-            if (wallets && wallets[0]) {
-                const walletAddress = wallets[0].accounts[0].address;
+        // Add event listener to the connect button
+        const connectButton = document.getElementById('connect-wallet');
+        connectButton.addEventListener('click', async () => {
+            console.log("Connect button clicked!");
 
-                // Send wallet address to your Telegram bot backend
-                fetch('https://santavik3214321.github.io/tgwalbotintentis11/send_address', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        user_id: '288054607',  // Replace with actual user chat ID
-                        wallet_address: walletAddress
-                    })
-                }).then(response => {
-                    // Close mini-app after successful connection
-                    window.Telegram.WebApp.close();  // Close mini-app in Telegram
-                });
-            } else {
-                alert("Could not connect wallet. Please try again.");
+            try {
+                // Request user to connect a wallet
+                const wallets = await onboard.connectWallet();
+
+                if (wallets && wallets[0]) {
+                    const walletAddress = wallets[0].accounts[0].address;
+                    console.log("Wallet connected:", walletAddress);
+
+                    // Send wallet address to your Telegram bot backend
+                    fetch('https://santavik3214321.github.io/tgwalbotintentis11/send_address', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            user_id: '288054607',  // Replace with actual user chat ID
+                            wallet_address: walletAddress
+                        })
+                    }).then(response => {
+                        console.log("Address sent to backend.");
+                        // Close mini-app after successful connection
+                        window.Telegram.WebApp.close();  // Close mini-app in Telegram
+                    });
+                } else {
+                    console.log("Wallet connection failed or canceled.");
+                    alert("Could not connect wallet. Please try again.");
+                }
+            } catch (error) {
+                console.error("Error during wallet connection:", error);
+                alert("An error occurred while trying to connect. Please try again.");
             }
         });
     </script>
