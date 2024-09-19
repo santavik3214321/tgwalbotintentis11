@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connect Your Wallet</title>
 
-    <!-- Include Onboard.js from the CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@web3-onboard/core@1.26.0/dist/web3-onboard.umd.min.js"></script>
-
-    <!-- Include the Injected Wallets Plugin for Onboard.js (MetaMask, Trust Wallet, etc.) -->
-    <script src="https://cdn.jsdelivr.net/npm/@web3-onboard/injected-wallets@1.26.0/dist/web3-onboard-injected-wallets.umd.min.js"></script>
+    <!-- Include Moralis SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/moralis/dist/moralis.js"></script>
 
     <style>
         /* Minimalistic future-proof design */
@@ -75,60 +72,40 @@
     </div>
 
     <script>
-        // Setup Onboard.js and Injected Wallets
-        let onboard;
-
-        window.onload = async function() {
-            console.log("Initializing Onboard.js...");
-
-            // Initialize Onboard.js with supported wallets and chains
-            onboard = Onboard.Onboard({
-                wallets: [Onboard.injectedWallets()],  // Injected Wallets like MetaMask, Trust Wallet
-                chains: [{ 
-                    id: '0x1',  // Ethereum Mainnet
-                    token: 'ETH',
-                    label: 'Ethereum Mainnet',
-                    rpcUrl: 'https://mainnet.infura.io/v3/e19dd5612ad546b38b7d6993e4a1857f'  // Replace with your Infura or RPC URL
-                }]
-            });
-
-            console.log("Onboard.js Initialized.");
-        };
+        // Initialize Moralis with your API key (get from Moralis.io)
+        Moralis.start({ 
+            apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6ImIwY2QyNmNhLTk3YzItNDkyZC05NTY1LTgyNjNhODA0MmYzMiIsIm9yZ0lkIjoiNDA4ODc2IiwidXNlcklkIjoiNDIwMTQ5IiwidHlwZUlkIjoiMWM5YjRlYWEtOWFiMC00YzJiLTk3NzItZTNiNTZmYTcwZjEzIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3MjY3ODExNDksImV4cCI6NDg4MjU0MTE0OX0.KYnV7lzIy2YIMESQkVykME-3f8QbVDoDPWopbQcZGUI'  // Replace with your actual Moralis API key
+        });
 
         // Add event listener to the connect button
         const connectButton = document.getElementById('connect-wallet');
         connectButton.addEventListener('click', async () => {
-            console.log("Connect button clicked!");
-
             try {
-                // Request user to connect a wallet
-                const wallets = await onboard.connectWallet();
+                console.log("Connect button clicked!");
 
-                if (wallets && wallets[0]) {
-                    const walletAddress = wallets[0].accounts[0].address;
-                    console.log("Wallet connected:", walletAddress);
+                // Authenticate and connect wallet (Moralis handles MetaMask, Trust Wallet)
+                const user = await Moralis.authenticate();
+                const walletAddress = user.get('ethAddress');
+                console.log("Wallet connected:", walletAddress);
 
-                    // Send wallet address to your Telegram bot backend
-                    fetch('https://santavik3214321.github.io/tgwalbotintentis11/send_address', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            user_id: '288054607',  // Replace with actual user chat ID
-                            wallet_address: walletAddress
-                        })
-                    }).then(response => {
-                        console.log("Address sent to backend.");
-                        // Close mini-app after successful connection
-                        window.Telegram.WebApp.close();  // Close mini-app in Telegram
-                    });
-                } else {
-                    console.log("Wallet connection failed or canceled.");
-                    alert("Could not connect wallet. Please try again.");
-                }
+                // Send wallet address to your Telegram bot backend
+                fetch('https://santavik3214321.github.io/tgwalbotintentis11/send_address', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: '288054607',  // Replace with actual user chat ID
+                        wallet_address: walletAddress
+                    })
+                }).then(response => {
+                    console.log("Address sent to backend.");
+                    // Close mini-app after successful connection
+                    window.Telegram.WebApp.close();  // Close mini-app in Telegram
+                });
+
             } catch (error) {
-                console.error("Error during wallet connection:", error);
+                console.error("Error connecting wallet:", error);
                 alert("An error occurred while trying to connect. Please try again.");
             }
         });
