@@ -4,47 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connect Your Wallet</title>
-    <!-- Include Web3Modal and Ethers.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3modal/1.9.1/web3modal.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@ethersproject/providers@5.5.2/lib/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.5.4/dist/ethers.umd.min.js"></script>
+
+    <!-- Include Onboard.js from the CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@web3-onboard/core@1.26.0/dist/web3-onboard.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3-onboard/injected-wallets@1.26.0/dist/web3-onboard-injected-wallets.umd.min.js"></script>
+
     <style>
+        /* Minimalistic future-proof design */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
         body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1f1c2c, #928dab);
+            color: #ffffff;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             text-align: center;
-            margin: 20px;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            font-weight: 600;
         }
         button {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin: 20px;
+            padding: 12px 24px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(31, 38, 135, 0.37);
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
-    <h1>Connect Your Wallet</h1>
-    <button id="connect-wallet">Connect Wallet</button>
+
+    <div class="container">
+        <h1>Connect Your Wallet</h1>
+        <button id="connect-wallet">Connect Wallet</button>
+        <div class="footer">Secure connection with MetaMask, Trust Wallet, Ledger</div>
+    </div>
 
     <script>
-        let provider;
+        let onboard;
         const connectButton = document.getElementById('connect-wallet');
 
         connectButton.addEventListener('click', async () => {
-            // Initialize Web3Modal with wallet providers (MetaMask, Trust Wallet, Ledger)
-            const web3Modal = new Web3Modal({
-                cacheProvider: false, // optional
-                providerOptions: {}   // Use default options to support MetaMask, Trust Wallet, Ledger
+            // Initialize Onboard.js with supported wallets
+            onboard = Onboard.Onboard({
+                wallets: [Onboard.injectedWallets()],
+                chains: [{ id: '0x1', token: 'ETH', label: 'Ethereum Mainnet', rpcUrl: 'https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID' }]
             });
 
-            try {
-                // Open modal to select wallet provider
-                const instance = await web3Modal.connect();
-                provider = new ethers.providers.Web3Provider(instance);
+            // Request user to connect a wallet
+            const wallets = await onboard.connectWallet();
 
-                // Get the connected wallet address
-                const signer = provider.getSigner();
-                const walletAddress = await signer.getAddress();
+            if (wallets && wallets[0]) {
+                const walletAddress = wallets[0].accounts[0].address;
 
-                // Send wallet address to Telegram bot server
+                // Send wallet address to your Telegram bot backend
                 fetch('https://santavik3214321.github.io/tgwalbotintentis11/send_address', {
                     method: 'POST',
                     headers: {
@@ -58,10 +103,8 @@
                     // Close mini-app after successful connection
                     window.Telegram.WebApp.close();  // Close mini-app in Telegram
                 });
-
-            } catch (error) {
-                console.error("User rejected the connection or there was an issue.", error);
-                alert("Could not connect to the wallet. Please ensure you have MetaMask or Trust Wallet installed.");
+            } else {
+                alert("Could not connect wallet. Please try again.");
             }
         });
     </script>
