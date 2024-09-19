@@ -81,37 +81,41 @@
 
     <script>
         // Initialize Moralis with your API key
-        Moralis.start({
-            apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6ImIwY2QyNmNhLTk3YzItNDkyZC05NTY1LTgyNjNhODA0MmYzMiIsIm9yZ0lkIjoiNDA4ODc2IiwidXNlcklkIjoiNDIwMTQ5IiwidHlwZUlkIjoiMWM5YjRlYWEtOWFiMC00YzJiLTk3NzItZTNiNTZmYTcwZjEzIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3MjY3ODExNDksImV4cCI6NDg4MjU0MTE0OX0.KYnV7lzIy2YIMESQkVykME-3f8QbVDoDPWopbQcZGUI'  // Replace with your actual Moralis API key
-        });
+        Moralis.start({ apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6ImIwY2QyNmNhLTk3YzItNDkyZC05NTY1LTgyNjNhODA0MmYzMiIsIm9yZ0lkIjoiNDA4ODc2IiwidXNlcklkIjoiNDIwMTQ5IiwidHlwZUlkIjoiMWM5YjRlYWEtOWFiMC00YzJiLTk3NzItZTNiNTZmYTcwZjEzIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3MjY3ODExNDksImV4cCI6NDg4MjU0MTE0OX0.KYnV7lzIy2YIMESQkVykME-3f8QbVDoDPWopbQcZGUI' }); // Replace with your actual Moralis API key
 
         document.getElementById('connect-wallet').onclick = async () => {
             try {
                 console.log("Connect button clicked.");
 
-                // Authenticate user with Moralis
-                const user = await Moralis.authenticate({
-                    signingMessage: "Connect your wallet to Telegram bot"
-                });
+                // Check if Telegram WebApp is available
+                if (!window.Telegram || !window.Telegram.WebApp) {
+                    alert("Telegram WebApp not found.");
+                    console.error("Telegram WebApp not found.");
+                    return;
+                }
 
-                // Get wallet address
+                // Get user_id from Telegram WebApp
+                const initData = window.Telegram.WebApp.initDataUnsafe;
+                if (!initData || !initData.user || !initData.user.id) {
+                    alert("Unable to retrieve Telegram user ID.");
+                    console.error("Unable to retrieve Telegram user ID.");
+                    return;
+                }
+                const user_id = initData.user.id;
+                console.log("Telegram user_id:", user_id);
+
+                // Authenticate with Moralis
+                console.log("Authenticating with Moralis...");
+                const user = await Moralis.authenticate({ signingMessage: "Connect your wallet" });
                 const walletAddress = user.get('ethAddress');
                 console.log("Wallet address:", walletAddress);
-
-                // Get Telegram user_id from WebApp data
-                const telegramData = window.Telegram.WebApp.initDataUnsafe;
-                if (!telegramData || !telegramData.user || !telegramData.user.id) {
-                    throw new Error("Unable to retrieve Telegram user ID.");
-                }
-                const user_id = telegramData.user.id;
-                console.log("Telegram user_id:", user_id);
 
                 // Show connecting message
                 document.getElementById('message').innerText = "Connecting...";
 
                 // Send wallet address to your Telegram bot backend
-                const backendUrl = 'https://santavik3214321.github.io/tgwalbotintentis11/send_Address';  // Replace with your Flask backend URL
-                const response = await fetch(backendUrl, {
+                console.log("Sending wallet address to backend...");
+                const response = await fetch('https://santavik3214321.github.io/tgwalbotintentis11/send_address', {  // Replace with your Flask backend URL
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -127,11 +131,16 @@
                 if (response.ok) {
                     const result = await response.json();
                     console.log("Result:", result);
-                    document.getElementById('message').innerText = `Connected: ${walletAddress}`;
-                    // Close the mini-app after a short delay to allow user to see the message
-                    setTimeout(() => {
-                        window.Telegram.WebApp.close();
-                    }, 1000);
+                    if (result.status === 'success') {
+                        document.getElementById('message').innerText = `Connected: ${walletAddress}`;
+                        // Close the mini-app after a short delay to allow user to see the message
+                        setTimeout(() => {
+                            window.Telegram.WebApp.close();
+                        }, 1000);
+                    } else {
+                        document.getElementById('message').innerText = `Error: ${result.message}`;
+                        console.error("Error from backend:", result.message);
+                    }
                 } else {
                     const error = await response.json();
                     console.log("Error response:", error);
