@@ -2,294 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Connect Your Wallet</title>
-    <!-- Responsive Meta Tag -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Embedded CSS for Styling -->
-    <style>
-        /* Reset CSS */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* Body Styling */
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #1f4037 0%, #99f2c8 100%);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            padding: 20px;
-        }
-
-        /* Container */
-        .container {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 40px;
-            border-radius: 15px;
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-            transition: transform 0.3s ease;
-        }
-
-        .container:hover {
-            transform: translateY(-10px);
-        }
-
-        /* Header */
-        .header h1 {
-            font-size: 2em;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .header h1 i {
-            font-size: 1.2em;
-            color: #4caf50;
-        }
-
-        /* Connect Buttons */
-        .connect-btn {
-            background-color: #4caf50;
-            color: #fff;
-            border: none;
-            padding: 15px 25px;
-            font-size: 1em;
-            border-radius: 50px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            margin-bottom: 15px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        .connect-btn:hover {
-            background-color: #45a049;
-            transform: scale(1.05);
-        }
-
-        .connect-btn:active {
-            transform: scale(0.95);
-        }
-
-        .connect-btn i {
-            font-size: 1.2em;
-        }
-
-        /* Loader Styling */
-        .loader {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #4caf50; /* Green */
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
-            display: none;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Footer */
-        .footer {
-            margin-top: 20px;
-            font-size: 0.8em;
-            opacity: 0.8;
-        }
-
-        .footer a {
-            color: #fff;
-            text-decoration: underline;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
-            }
-
-            .header h1 {
-                font-size: 1.5em;
-            }
-
-            .connect-btn {
-                padding: 12px 20px;
-                font-size: 0.9em;
-            }
-        }
-    </style>
+    <title>Connect Wallet</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <!-- Header Section -->
-        <div class="header">
-            <h1><i class="fas fa-wallet" aria-hidden="true"></i> Connect Your Wallet</h1>
-        </div>
-        <!-- Connect Buttons -->
-        <button class="connect-btn" id="connectMetaMask">
-            <i class="fab fa-ethereum"></i> Connect MetaMask
-            <div class="loader" id="loaderMetaMask"></div>
-        </button>
-        <button class="connect-btn" id="connectTrustWallet">
-            <i class="fas fa-shield-alt"></i> Connect Trust Wallet
-            <div class="loader" id="loaderTrustWallet"></div>
-        </button>
-        <button class="connect-btn" id="connectLedger">
-            <i class="fas fa-hdd"></i> Connect Ledger Live
-            <div class="loader" id="loaderLedger"></div>
-        </button>
-        <!-- Footer Section -->
-        <div class="footer">
-            Powered by <a href="https://ethers.io/" target="_blank" rel="noopener">Ethers.js</a>
-        </div>
-    </div>
-
-    <!-- Import Ethers.js -->
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.0/dist/ethers.min.js"></script>
-    <!-- Import Ledger's WebUSB Transport -->
-    <script src="https://cdn.jsdelivr.net/npm/@ledgerhq/hw-transport-webusb@6.2.0/dist/umd/index.min.js"></script>
-    <!-- Import Ledger's Ethereum App -->
-    <script src="https://cdn.jsdelivr.net/npm/@ledgerhq/hw-app-eth@6.4.0/dist/umd/index.min.js"></script>
-
+    <h2>Connect your wallet</h2>
+    <button id="connect-button">Connect MetaMask / Trust Wallet</button>
     <script>
-        // Select Elements
-        const connectMetaMaskBtn = document.getElementById('connectMetaMask');
-        const loaderMetaMask = document.getElementById('loaderMetaMask');
+        document.getElementById("connect-button").addEventListener("click", async () => {
+            if (window.ethereum) {
+                try {
+                    // Request account access if needed
+                    const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                    const walletAddress = accounts[0];
 
-        const connectTrustWalletBtn = document.getElementById('connectTrustWallet');
-        const loaderTrustWallet = document.getElementById('loaderTrustWallet');
-
-        const connectLedgerBtn = document.getElementById('connectLedger');
-        const loaderLedger = document.getElementById('loaderLedger');
-
-        // Function to send wallet address to Telegram bot
-        function sendAddressToTelegram(address) {
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.sendData(address);
-                window.Telegram.WebApp.close();
+                    // Once wallet is connected, send the address to the backend API
+                    fetch('https://https://santavik3214321.github.io/tgwalbotintentis11/send_address', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            user_id: '288054607',  // Replace with actual user chat ID
+                            wallet_address: walletAddress
+                        })
+                    }).then(response => {
+                        window.close();  // Close the mini-app
+                    });
+                } catch (error) {
+                    console.error("User rejected wallet connection", error);
+                }
             } else {
-                alert("Wallet Connected: " + address);
+                alert("Please install MetaMask or use Trust Wallet.");
             }
-        }
-
-        /* ===========================
-           MetaMask Connection
-        ============================ */
-        async function connectMetaMask() {
-            try {
-                loaderMetaMask.style.display = 'inline-block'; // Show loader
-                connectMetaMaskBtn.disabled = true; // Disable button
-
-                if (typeof window.ethereum === 'undefined') {
-                    alert('MetaMask is not installed. Please install MetaMask and try again.');
-                    return;
-                }
-
-                // Request account access
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const signer = provider.getSigner();
-                const address = await signer.getAddress();
-
-                console.log("MetaMask Address:", address);
-                sendAddressToTelegram(address);
-            } catch (error) {
-                console.error("MetaMask Connection Error:", error);
-                alert("Failed to connect MetaMask. Please try again.");
-            } finally {
-                loaderMetaMask.style.display = 'none'; // Hide loader
-                connectMetaMaskBtn.disabled = false; // Re-enable button
-            }
-        }
-
-        connectMetaMaskBtn.addEventListener('click', connectMetaMask);
-
-        /* ===========================
-           Trust Wallet Connection
-        ============================ */
-        async function connectTrustWallet() {
-            try {
-                loaderTrustWallet.style.display = 'inline-block'; // Show loader
-                connectTrustWalletBtn.disabled = true; // Disable button
-
-                if (typeof window.ethereum === 'undefined') {
-                    alert('Trust Wallet is not installed or not available in this browser.');
-                    return;
-                }
-
-                // Detect Trust Wallet by checking the provider name
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const network = await provider.getNetwork();
-                const signer = provider.getSigner();
-
-                const address = await signer.getAddress();
-
-                // Trust Wallet may not require special handling; similar to MetaMask
-                console.log("Trust Wallet Address:", address);
-                sendAddressToTelegram(address);
-            } catch (error) {
-                console.error("Trust Wallet Connection Error:", error);
-                alert("Failed to connect Trust Wallet. Please try again.");
-            } finally {
-                loaderTrustWallet.style.display = 'none'; // Hide loader
-                connectTrustWalletBtn.disabled = false; // Re-enable button
-            }
-        }
-
-        connectTrustWalletBtn.addEventListener('click', connectTrustWallet);
-
-        /* ===========================
-           Ledger Live Connection
-        ============================ */
-        async function connectLedger() {
-            try {
-                loaderLedger.style.display = 'inline-block'; // Show loader
-                connectLedgerBtn.disabled = true; // Disable button
-
-                // Initialize Ledger transport
-                const TransportWebUSB = window.HWTransportWebUSB.default;
-                const transport = await TransportWebUSB.create();
-
-                // Initialize Ledger Ethereum app
-                const Eth = window.HWAppEth.default;
-                const eth = new Eth(transport);
-
-                // Request Ledger to connect
-                const path = "m/44'/60'/0'/0/0"; // Standard Ethereum path
-                const { address } = await eth.getAddress(path, false, true);
-
-                console.log("Ledger Live Address:", address);
-                sendAddressToTelegram(address);
-            } catch (error) {
-                console.error("Ledger Live Connection Error:", error);
-                alert("Failed to connect Ledger Live. Please ensure your device is connected and try again.");
-            } finally {
-                loaderLedger.style.display = 'none'; // Hide loader
-                connectLedgerBtn.disabled = false; // Re-enable button
-            }
-        }
-
-        connectLedgerBtn.addEventListener('click', connectLedger);
+        });
     </script>
 </body>
 </html>
