@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connect Your Wallet</title>
-
     <!-- Include Moralis SDK -->
     <script src="https://cdn.jsdelivr.net/npm/moralis/dist/moralis.js"></script>
-
     <style>
         /* Minimalistic future-proof design */
         * {
@@ -36,6 +34,8 @@
             box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
             border: 1px solid rgba(255, 255, 255, 0.18);
             text-align: center;
+            width: 90%;
+            max-width: 400px;
         }
         h1 {
             font-size: 1.8rem;
@@ -52,6 +52,7 @@
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(31, 38, 135, 0.37);
             transition: background-color 0.3s ease;
+            width: 100%;
         }
         button:hover {
             background-color: #45a049;
@@ -61,6 +62,12 @@
             font-size: 0.85rem;
             opacity: 0.8;
         }
+        #message {
+            margin-top: 15px;
+            font-size: 1rem;
+            color: #ffcc00;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -68,47 +75,74 @@
     <div class="container">
         <h1>Connect Your Wallet</h1>
         <button id="connect-wallet">Connect Wallet</button>
+        <div id="message"></div>
         <div class="footer">Secure connection with MetaMask, Trust Wallet, Ledger</div>
     </div>
 
     <script>
-        // Initialize Moralis with your API key (get from Moralis.io)
-        Moralis.start({ 
+        // Initialize Moralis with your API key
+        Moralis.start({
             apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6ImIwY2QyNmNhLTk3YzItNDkyZC05NTY1LTgyNjNhODA0MmYzMiIsIm9yZ0lkIjoiNDA4ODc2IiwidXNlcklkIjoiNDIwMTQ5IiwidHlwZUlkIjoiMWM5YjRlYWEtOWFiMC00YzJiLTk3NzItZTNiNTZmYTcwZjEzIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3MjY3ODExNDksImV4cCI6NDg4MjU0MTE0OX0.KYnV7lzIy2YIMESQkVykME-3f8QbVDoDPWopbQcZGUI'  // Replace with your actual Moralis API key
         });
 
-        // Add event listener to the connect button
-        const connectButton = document.getElementById('connect-wallet');
-        connectButton.addEventListener('click', async () => {
+        document.getElementById('connect-wallet').onclick = async () => {
             try {
-                console.log("Connect button clicked!");
+                console.log("Connect button clicked.");
 
-                // Authenticate and connect wallet (Moralis handles MetaMask, Trust Wallet)
-                const user = await Moralis.authenticate();
+                // Authenticate user with Moralis
+                const user = await Moralis.authenticate({
+                    signingMessage: "Connect your wallet to Telegram bot"
+                });
+
+                // Get wallet address
                 const walletAddress = user.get('ethAddress');
-                console.log("Wallet connected:", walletAddress);
+                console.log("Wallet address:", walletAddress);
+
+                // Get Telegram user_id from WebApp data
+                const telegramData = window.Telegram.WebApp.initDataUnsafe;
+                if (!telegramData || !telegramData.user || !telegramData.user.id) {
+                    throw new Error("Unable to retrieve Telegram user ID.");
+                }
+                const user_id = telegramData.user.id;
+                console.log("Telegram user_id:", user_id);
+
+                // Show connecting message
+                document.getElementById('message').innerText = "Connecting...";
 
                 // Send wallet address to your Telegram bot backend
-                fetch('https://santavik3214321.github.io/tgwalbotintentis11/send_address', {
+                const backendUrl = 'https://santavik3214321.github.io/tgwalbotintentis11/send_Address';  // Replace with your Flask backend URL
+                const response = await fetch(backendUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        user_id: '288054607',  // Replace with actual user chat ID
+                        user_id: user_id,
                         wallet_address: walletAddress
                     })
-                }).then(response => {
-                    console.log("Address sent to backend.");
-                    // Close mini-app after successful connection
-                    window.Telegram.WebApp.close();  // Close mini-app in Telegram
                 });
 
+                console.log("Response from send_address:", response);
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log("Result:", result);
+                    document.getElementById('message').innerText = `Connected: ${walletAddress}`;
+                    // Close the mini-app after a short delay to allow user to see the message
+                    setTimeout(() => {
+                        window.Telegram.WebApp.close();
+                    }, 1000);
+                } else {
+                    const error = await response.json();
+                    console.log("Error response:", error);
+                    document.getElementById('message').innerText = "Failed to send address to Telegram bot.";
+                }
+
             } catch (error) {
-                console.error("Error connecting wallet:", error);
-                alert("An error occurred while trying to connect. Please try again.");
+                console.error("Error during wallet connection:", error);
+                document.getElementById('message').innerText = "An error occurred. Please try again.";
             }
-        });
+        };
     </script>
 </body>
 </html>
