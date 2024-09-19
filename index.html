@@ -3,22 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect Wallet</title>
+    <title>Connect Your Wallet</title>
     <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+    <style>
+        body {
+            text-align: center;
+            margin: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h2>Connect your wallet</h2>
-    <button id="connect-button">Connect MetaMask / Trust Wallet</button>
+    <h1>Connect Your Wallet</h1>
+    <button id="connect-metamask">Connect MetaMask / Trust Wallet</button>
+    <button id="connect-ledger">Connect Ledger</button>
+
     <script>
-        document.getElementById("connect-button").addEventListener("click", async () => {
+        const connectButton = document.getElementById('connect-metamask');
+        const ledgerButton = document.getElementById('connect-ledger');
+
+        connectButton.addEventListener('click', async () => {
             if (window.ethereum) {
                 try {
-                    // Request account access if needed
+                    // Request account access
                     const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
                     const walletAddress = accounts[0];
 
-                    // Once wallet is connected, send the address to the backend API
-                    fetch('https://https://santavik3214321.github.io/tgwalbotintentis11/send_address', {
+                    // Send the connected wallet address back to the bot
+                    fetch('https://santavik3214321.github.io/tgwalbotintentis11/send_address', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -28,14 +44,20 @@
                             wallet_address: walletAddress
                         })
                     }).then(response => {
-                        window.close();  // Close the mini-app
+                        window.Telegram.WebApp.close();  // Close the mini-app
                     });
                 } catch (error) {
-                    console.error("User rejected wallet connection", error);
+                    console.error("User rejected the request:", error);
                 }
             } else {
                 alert("Please install MetaMask or use Trust Wallet.");
             }
+        });
+
+        ledgerButton.addEventListener('click', async () => {
+            // Code for connecting Ledger
+            // You may need to use a specific Ledger API or a Web3 provider compatible with Ledger
+            alert("Ledger connection is not implemented in this example.");
         });
     </script>
 </body>
