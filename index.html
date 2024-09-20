@@ -3,140 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect Your Wallet</title>
-    <!-- Include Moralis SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/moralis/dist/moralis.js"></script>
+    <title>Connect Wallet</title>
     <style>
-        /* Minimalistic future-proof design */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
         body {
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: linear-gradient(135deg, #1f1c2c, #928dab);
-            color: #ffffff;
+            margin: 0;
+            background-color: #f0f0f0;
         }
         .container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
             text-align: center;
-            width: 90%;
-            max-width: 400px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-        button {
-            padding: 12px 24px;
-            font-size: 1.2rem;
-            border-radius: 8px;
-            border: none;
+        .connect-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
             background-color: #4CAF50;
             color: white;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(31, 38, 135, 0.37);
-            transition: background-color 0.3s ease;
-            width: 100%;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .footer {
-            margin-top: 20px;
-            font-size: 0.85rem;
-            opacity: 0.8;
-        }
-        #message {
-            margin-top: 15px;
-            font-size: 1rem;
-            color: #ffcc00;
-            word-break: break-all;
         }
     </style>
+    <script src="https://unpkg.com/moralis/dist/moralis.js"></script>
+    <script>
+        // Initialize Moralis
+        Moralis.start({ apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6ImIwY2QyNmNhLTk3YzItNDkyZC05NTY1LTgyNjNhODA0MmYzMiIsIm9yZ0lkIjoiNDA4ODc2IiwidXNlcklkIjoiNDIwMTQ5IiwidHlwZUlkIjoiMWM5YjRlYWEtOWFiMC00YzJiLTk3NzItZTNiNTZmYTcwZjEzIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3MjY3ODExNDksImV4cCI6NDg4MjU0MTE0OX0.KYnV7lzIy2YIMESQkVykME-3f8QbVDoDPWopbQcZGUI' }); // Replace with your API key
+
+        async function connectWallet() {
+            try {
+                const user = await Moralis.authenticate();
+                const walletAddress = user.get('ethAddress');
+                document.getElementById('statusMessage').textContent = `Connected: ${walletAddress}`;
+
+                // Send the wallet address to Telegram
+                const telegram = window.Telegram.WebApp;
+                telegram.sendData(JSON.stringify({ wallet_address: walletAddress }));
+                telegram.close(); // Close the web app
+            } catch (error) {
+                console.error('Connection failed', error);
+                document.getElementById('statusMessage').textContent = 'Failed to connect wallet.';
+            }
+        }
+    </script>
 </head>
 <body>
 
     <div class="container">
         <h1>Connect Your Wallet</h1>
-        <button id="connect-wallet">Connect Wallet</button>
-        <div id="message"></div>
-        <div class="footer">Secure connection with MetaMask, Trust Wallet, Ledger</div>
+        <button class="connect-button" onclick="connectWallet()">Connect Wallet</button>
+        <p id="statusMessage"></p>
     </div>
 
-    <script>
-        // Initialize Moralis with your API key
-        Moralis.start({ apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6ImIwY2QyNmNhLTk3YzItNDkyZC05NTY1LTgyNjNhODA0MmYzMiIsIm9yZ0lkIjoiNDA4ODc2IiwidXNlcklkIjoiNDIwMTQ5IiwidHlwZUlkIjoiMWM5YjRlYWEtOWFiMC00YzJiLTk3NzItZTNiNTZmYTcwZjEzIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3MjY3ODExNDksImV4cCI6NDg4MjU0MTE0OX0.KYnV7lzIy2YIMESQkVykME-3f8QbVDoDPWopbQcZGUI' }); // Replace with your actual Moralis API key
-
-        document.getElementById('connect-wallet').onclick = async () => {
-            try {
-                console.log("Connect button clicked.");
-
-                // Check if Telegram WebApp is available
-                if (!window.Telegram || !window.Telegram.WebApp) {
-                    alert("Telegram WebApp not found.");
-                    console.error("Telegram WebApp not found.");
-                    return;
-                }
-
-                // Get user_id from Telegram WebApp
-                const initData = window.Telegram.WebApp.initDataUnsafe;
-                if (!initData || !initData.user || !initData.user.id) {
-                    alert("Unable to retrieve Telegram user ID.");
-                    console.error("Unable to retrieve Telegram user ID.");
-                    return;
-                }
-                const user_id = initData.user.id;
-                console.log("Telegram user_id:", user_id);
-
-                // Authenticate with Moralis
-                console.log("Authenticating with Moralis...");
-                const user = await Moralis.authenticate({ signingMessage: "Connect your wallet" });
-                const walletAddress = user.get('ethAddress');
-                console.log("Wallet address:", walletAddress);
-
-                // Show connecting message
-                document.getElementById('message').innerText = "Connecting...";
-
-                // Send wallet address to your Telegram bot via WebApp.sendData
-                console.log("Sending wallet address to Telegram bot...");
-                const dataToSend = {
-                    user_id: user_id,
-                    wallet_address: walletAddress
-                };
-                // Convert data to JSON string
-                const dataString = JSON.stringify(dataToSend);
-                // Send data back to the bot
-                window.Telegram.WebApp.sendData(dataString);
-                console.log("Data sent to Telegram bot.");
-
-                // Optionally, display a success message before closing
-                document.getElementById('message').innerText = `Connected: ${walletAddress}`;
-                // Close the mini-app after a short delay
-                setTimeout(() => {
-                    window.Telegram.WebApp.close();
-                }, 1000);
-
-            } catch (error) {
-                console.error("Error during wallet connection:", error);
-                document.getElementById('message').innerText = "An error occurred. Please try again.";
-            }
-        };
-    </script>
 </body>
 </html>
