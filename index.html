@@ -3,35 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wallet Connect</title>
+    <title>Connect Wallet</title>
+    <script src="https://unpkg.com/moralis/dist/moralis.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.7.3/dist/umd/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <h1>Connect your wallet</h1>
-    <button id="connect-wallet-btn">Connect Wallet</button>
-    <p id="status"></p>
+    <h1>Connect Your Wallet</h1>
+    <button id="connectWalletBtn">Connect Wallet</button>
 
-    <script src="https://cdn.jsdelivr.net/npm/moralis/dist/moralis.js"></script>
     <script>
         // Initialize Moralis
-        Moralis.start({ apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6ImIwY2QyNmNhLTk3YzItNDkyZC05NTY1LTgyNjNhODA0MmYzMiIsIm9yZ0lkIjoiNDA4ODc2IiwidXNlcklkIjoiNDIwMTQ5IiwidHlwZUlkIjoiMWM5YjRlYWEtOWFiMC00YzJiLTk3NzItZTNiNTZmYTcwZjEzIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3MjY3ODExNDksImV4cCI6NDg4MjU0MTE0OX0.KYnV7lzIy2YIMESQkVykME-3f8QbVDoDPWopbQcZGUI' });
-
-        const connectButton = document.getElementById('connect-wallet-btn');
-        const status = document.getElementById('status');
-
-        connectButton.addEventListener('click', async () => {
-            try {
-                const user = await Moralis.authenticate({ provider: 'walletconnect' });
-                const walletAddress = user.get('ethAddress');
-                status.textContent = `Connected: ${walletAddress}`;
-                
-                // Send wallet address to Telegram bot
-                window.Telegram.WebApp.sendData(walletAddress); 
-                
-            } catch (error) {
-                status.textContent = 'Connection failed';
-                console.error(error);
-            }
+        Moralis.start({
+            apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6ImIwY2QyNmNhLTk3YzItNDkyZC05NTY1LTgyNjNhODA0MmYzMiIsIm9yZ0lkIjoiNDA4ODc2IiwidXNlcklkIjoiNDIwMTQ5IiwidHlwZUlkIjoiMWM5YjRlYWEtOWFiMC00YzJiLTk3NzItZTNiNTZmYTcwZjEzIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3MjY3ODExNDksImV4cCI6NDg4MjU0MTE0OX0.KYnV7lzIy2YIMESQkVykME-3f8QbVDoDPWopbQcZGUI"  // Replace with your Moralis API key
         });
+
+        // Function to handle WalletConnect login
+        async function loginWithWalletConnect() {
+            try {
+                const user = await Moralis.authenticate({
+                    provider: "walletconnect",
+                    chainId: 1,  // Ethereum Mainnet
+                    mobileLinks: ["metamask", "trust"],  // For mobile support
+                });
+
+                // Get the connected wallet address
+                const walletAddress = user.get('ethAddress');
+                console.log("Wallet connected:", walletAddress);
+
+                // Send wallet address back to Telegram bot
+                window.Telegram.WebApp.sendData(walletAddress);
+
+                // Close the Telegram mini-app
+                window.Telegram.WebApp.close();
+            } catch (error) {
+                console.error("Wallet connection failed:", error);
+            }
+        }
+
+        // Event listener for the "Connect Wallet" button
+        document.getElementById("connectWalletBtn").addEventListener("click", loginWithWalletConnect);
     </script>
 </body>
 </html>
