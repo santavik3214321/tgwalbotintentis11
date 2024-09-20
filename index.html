@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connect Wallet</title>
-    <script src="https://unpkg.com/moralis/dist/moralis.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.7.3/dist/umd/index.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
     <style>
@@ -25,22 +24,27 @@
     <button id="connectWalletBtn">Connect Wallet</button>
 
     <script>
-        // Initialize Moralis
-        Moralis.start({
-            apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6ImIwY2QyNmNhLTk3YzItNDkyZC05NTY1LTgyNjNhODA0MmYzMiIsIm9yZ0lkIjoiNDA4ODc2IiwidXNlcklkIjoiNDIwMTQ5IiwidHlwZUlkIjoiMWM5YjRlYWEtOWFiMC00YzJiLTk3NzItZTNiNTZmYTcwZjEzIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3MjY3ODExNDksImV4cCI6NDg4MjU0MTE0OX0.KYnV7lzIy2YIMESQkVykME-3f8QbVDoDPWopbQcZGUI"  // Replace with your Moralis API key
-        });
-
         // Function to handle WalletConnect login
         async function loginWithWalletConnect() {
             try {
-                const user = await Moralis.authenticate({
-                    provider: "walletconnect",
-                    chainId: 1,  // Ethereum Mainnet
-                    mobileLinks: ["metamask", "trust"],  // For mobile support
+                // Initialize WalletConnect Provider
+                const provider = new WalletConnectProvider({
+                    rpc: {
+                        1: "https://mainnet.infura.io/v3/e19dd5612ad546b38b7d6993e4a1857f" // Ethereum Mainnet
+                    },
+                    qrcode: true, // Show QR code
                 });
 
-                // Get the connected wallet address
-                const walletAddress = user.get('ethAddress');
+                // Enable session (opens QR code modal)
+                await provider.enable();
+
+                // Create a new Web3 instance with the provider
+                const web3 = new Web3(provider);
+
+                // Get the user's account address
+                const accounts = await web3.eth.getAccounts();
+                const walletAddress = accounts[0];
+
                 console.log("Wallet connected:", walletAddress);
 
                 // Send wallet address back to Telegram bot
