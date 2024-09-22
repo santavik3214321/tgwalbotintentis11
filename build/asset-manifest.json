@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/tgwalbotintentis11/build/static/css/main.e5ab6413.css",
+    "main.js": "/tgwalbotintentis11/build/static/js/main.a056d18a.js",
+    "static/js/801.866d7979.chunk.js": "/tgwalbotintentis11/build/static/js/801.866d7979.chunk.js",
+    "static/js/507.e1c8043d.chunk.js": "/tgwalbotintentis11/build/static/js/507.e1c8043d.chunk.js",
+    "static/js/889.923c8ce9.chunk.js": "/tgwalbotintentis11/build/static/js/889.923c8ce9.chunk.js",
+    "static/js/466.8cd85a46.chunk.js": "/tgwalbotintentis11/build/static/js/466.8cd85a46.chunk.js",
+    "static/js/171.54824c5a.chunk.js": "/tgwalbotintentis11/build/static/js/171.54824c5a.chunk.js",
+    "static/js/903.35447f50.chunk.js": "/tgwalbotintentis11/build/static/js/903.35447f50.chunk.js",
+    "static/js/374.e838de2b.chunk.js": "/tgwalbotintentis11/build/static/js/374.e838de2b.chunk.js",
+    "index.html": "/tgwalbotintentis11/build/index.html",
+    "main.e5ab6413.css.map": "/tgwalbotintentis11/build/static/css/main.e5ab6413.css.map",
+    "main.a056d18a.js.map": "/tgwalbotintentis11/build/static/js/main.a056d18a.js.map",
+    "801.866d7979.chunk.js.map": "/tgwalbotintentis11/build/static/js/801.866d7979.chunk.js.map",
+    "507.e1c8043d.chunk.js.map": "/tgwalbotintentis11/build/static/js/507.e1c8043d.chunk.js.map",
+    "889.923c8ce9.chunk.js.map": "/tgwalbotintentis11/build/static/js/889.923c8ce9.chunk.js.map",
+    "171.54824c5a.chunk.js.map": "/tgwalbotintentis11/build/static/js/171.54824c5a.chunk.js.map",
+    "903.35447f50.chunk.js.map": "/tgwalbotintentis11/build/static/js/903.35447f50.chunk.js.map",
+    "374.e838de2b.chunk.js.map": "/tgwalbotintentis11/build/static/js/374.e838de2b.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e5ab6413.css",
+    "static/js/main.a056d18a.js"
+  ]
+}
